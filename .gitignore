@@ -50,3 +50,9 @@ vignettes/*.pdf
 __pycache__/
 .quarto/
 paper/*_files/
+/course
+CLAUDE.md
+
+# Journal articles (copyrighted; cited in paper/references.bib instead)
+other/literature/2021-*.pdf
+other/literature/2023-*.pdf
