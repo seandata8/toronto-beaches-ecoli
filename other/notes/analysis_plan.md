@@ -55,7 +55,7 @@ The simulation creates fake data with the same structure as the real data, with 
 |---|---|
 | Seed | fixed, so the simulation gives the same data every run |
 | Calendar | 2007–2026, daily from Victoria Day to Labour Day |
-| Beaches and sites | the 10 real beach names; 5 sites each, 4 at Sunnyside |
+| Beaches and sites | the 10 real beach names; 5 sites each, except 6 at Kew Balmy and 4 at Sunnyside, as in the real data before 2026 |
 | E. coli | built on a log10 scale as the sum of the four parts below, then converted back |
 | – beach baseline | 6 beaches at a common level, 2 moderately higher, 2 much higher; beaches are assigned to groups at random using the seed |
 | – city-wide daily effect | one value per day shared by all beaches (weather), which partly carries over to the next day |
