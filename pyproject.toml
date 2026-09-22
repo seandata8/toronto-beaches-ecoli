@@ -1,0 +1,19 @@
+[project]
+name = "toronto-beaches-ecoli"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Sean Murphy", email = "seandata8@gmail.com" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "polars>=1.44.2",
+]
+
+[project.scripts]
+toronto-beaches-ecoli = "toronto_beaches_ecoli:main"
+
+[build-system]
+requires = ["uv_build>=0.12.11,<0.13.0"]
+build-backend = "uv_build"
