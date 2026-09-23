@@ -59,7 +59,7 @@ CITY_SD = 0.30
 BEACH_CARRY_OVER = 0.5
 BEACH_SD = 0.34
 
-SITE_SD = 0.50
+SITE_SD = 0.60
 
 # Sunnyside (4 sites) and Kew Balmy (6 sites) are held at the common baseline on
 # purpose, so their results measure the effect of the site count on its own.
@@ -70,6 +70,15 @@ N_HIGH = 2
 # The laboratory reports in steps of 10 and cannot report below 10.
 REPORTING_STEP = 10
 DETECTION_LIMIT = 10
+
+# From 2018 the real data also has a ceiling: high samples are increasingly
+# reported as exactly 1,000 rather than measured, and in 2026 nothing above 1,000
+# appears at all. See `other/notes/raw_data_findings.md`. Simulating it lets the
+# analysis be run with and without a ceiling whose size is known.
+CEILING_VALUE = 1_000
+CEILING_FIRST_YEAR = 2018
+CEILING_SHARE = 0.75
+CEILING_COMPLETE_YEAR = 2026
 
 # A row is kept for every site on every sampling day even when no test was done.
 # In the real data 95% of blanks are whole beach-days rather than single samples:
@@ -179,6 +188,24 @@ simulated_data = simulated_data.with_columns(
     .cast(pl.Int64)
     .alias("eColi")
 ).drop("logEColi")
+
+# From 2018, three quarters of the results above 1,000 are reported as 1,000
+# instead of their measured value, and from 2026 all of them are. The true value
+# is discarded, as it is in the real data.
+capped = rng.random(simulated_data.height) < CEILING_SHARE
+simulated_data = simulated_data.with_columns(
+    pl.when(
+        (pl.col("collectionDate").dt.year() >= CEILING_FIRST_YEAR)
+        & (pl.col("eColi") > CEILING_VALUE)
+        & (
+            pl.Series(capped)
+            | (pl.col("collectionDate").dt.year() >= CEILING_COMPLETE_YEAR)
+        )
+    )
+    .then(CEILING_VALUE)
+    .otherwise(pl.col("eColi"))
+    .alias("eColi")
+)
 
 
 #### Add missing results ####

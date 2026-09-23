@@ -31,6 +31,26 @@ Summary of what `other/explore/raw_data_overview.ipynb` found in `data/01-raw_da
 - Values are strongly right-skewed and span several orders of magnitude, so a log scale suits graphs and models. [E. coli values]
 - 16,017 results (16%) are above 100.
 
+## A reporting ceiling at 1,000, from 2018
+
+Found on 23 September 2026 in the figure of every raw result (`other/explore/figures/all-raw-results.png`), which shows a dense bar sitting exactly on 1,000 in the later years.
+
+| Period | Results reported as exactly 1,000 | Results above 1,000 |
+|---|---|---|
+| 2007–2017 | 0 to 0.2% a year | 39 to 133 a year |
+| 2018–2025 | 1.0% to 2.3% a year | 10 to 42 a year |
+| 2026 | 1.8% | none, out of 5,684 results |
+
+Before 2018, 1,000 was an ordinary value and readings ran as high as 15,820. From 2018 the laboratory reports more and more high samples as exactly 1,000, and in 2026 nothing above 1,000 appears at all. This looks like a change in reporting practice rather than in the water: high results are being recorded as "1,000" rather than measured.
+
+So the data is censored at both ends, 10 below and 1,000 above, and the ceiling arrived partway through the record.
+
+**What this means for the analysis:**
+
+- **Counting days above 100 is unaffected.** A censored value of 1,000 is ten times the threshold, so a day capped at 1,000 was over the threshold whatever its true value.
+- **The model is affected slightly.** Beach coefficients come from mean log10 values, and capping the top squeezes those means, more so after 2018 and more so at the beaches with the most high days. It touches 1–2% of samples, so the effect is small, but it runs in a known direction: it understates how far the worst beaches sit above the rest.
+- **Capped values stay in.** Dropping them would throw away the worst days, which is the opposite of what the question needs. The handling is to document the ceiling and report which way it biases the estimate.
+
 ## Warning rule
 
 - Toronto's standard is 100 E. coli per 100 mL. The provincial and federal standard is 200. [*About Beach Water Quality*]

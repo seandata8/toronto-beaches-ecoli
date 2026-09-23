@@ -25,6 +25,7 @@ One framing point that shapes the uncertainty. The ten beaches are the whole pop
 - **Minimum results:** the daily geometric mean is computed only when at least 4 results are available. Four, not five, so that Sunnyside, which had only four sites before 2026, is included.
 - **Warning day:** a beach-day with a daily geometric mean above 100 E. coli per 100 mL (Toronto's standard). Because the dataset does not record whether a warning was actually posted, this is a measure defined here, not the official record, and is reported as "days exceeding the threshold" rather than "days with a posted warning". Toronto's own posting rule may use a two-day window.
 - **Floor value:** a result reported as 10. The laboratory filters a fixed volume of water, so a filter with no colonies cannot be reported as zero; it means "at or below the detection limit". About half of all results sit at this floor.
+- **Ceiling value:** a result reported as 1,000 from 2018 onward. High samples are increasingly recorded at that figure rather than measured, and in 2026 nothing above it appears at all; see `raw_data_findings.md`. It covers 1–2% of results a year.
 
 ## Data to analyse
 
@@ -59,6 +60,7 @@ Three complications, each with a handling:
 - **Days are not independent.** Levels carry over from one day to the next, so the standard errors the model reports are too small. Cluster by month-year, or block-bootstrap whole seasons, or thin to one day per week and check whether the conclusion survives.
 - **Forty-five pairs.** With ten beaches, correct the pairwise contrasts for multiple comparisons using Holm or Tukey.
 - **The floor.** The outcome is censored from below: 22% of beach-days have every sample at the detection limit, so their geometric mean is exactly 10 whatever the true level was. This is uneven across beaches, from 3.8% of days at Sunnyside to 33% at Hanlan's Point, so it shrinks the apparent gaps between the cleanest beaches most. Refit on days where at least one of the two beaches is above the floor, and report the censoring share per beach beside the coefficients so the reader can see where the estimate is weakest.
+- **The ceiling.** From 2018 the outcome is also censored from above at 1,000, which pulls the high beaches down rather than the clean ones up, and does so only in the later seasons. It covers 1–2% of results, so the effect is smaller than the floor's, but it runs against the paper's finding: it understates how far the worst beaches sit above the rest. Fit the model on the seasons before 2018 and from 2018 onward separately, and report whether the beach coefficients move. A difference would show the ceiling is doing work, and the direction is known in advance.
 
 **Site counts differ between beaches.** Sunnyside has 4 sites, Kew Balmy 6, the rest 5. A mean of 4 samples is noisier than one of 6, and because exceedance means crossing a fixed threshold, extra noise pushes more days over 100 even when the true level is identical. Sunnyside is therefore mildly favoured to look worse and Kew Balmy to look better, from site counts alone. The size of this effect is measured on the simulated data, where the site counts differ but the baselines do not, and the measured size is reported with the descriptive shares.
 
@@ -80,7 +82,11 @@ Three complications, each with a handling:
 
 ## Censoring check
 
-Recompute the headline numbers with floor values set to 5 rather than 10, the common convention of substituting half the detection limit, and state whether the conclusions change. One paragraph in an appendix.
+Recompute the headline numbers with floor values set to 5 rather than 10, the common convention of substituting half the detection limit, and state whether the conclusions change.
+
+Do the same at the top: recompute with the seasons from 2018 onward left out, which is the period the 1,000 ceiling covers. If the ranking of the beaches holds in both halves of the record, neither form of censoring is driving the result.
+
+One paragraph in an appendix, covering both.
 
 ## Simulation design (`scripts/00-simulate_data.py`)
 
@@ -97,6 +103,7 @@ The simulation creates fake data with the same structure as the real data, with 
 | – beach daily effect | one value per beach per day, which also partly carries over to the next day |
 | – site noise | independent for each sample |
 | Lab reporting | rounded to multiples of 10; anything below 10 reported as 10 |
+| Reporting ceiling | from 2018, three quarters of the results above 1,000 are reported as exactly 1,000 and their true value discarded; from 2026 all of them are. This mirrors the real data, and it means the analysis can be run on the simulated seasons with and without a ceiling whose size is known, which measures the bias rather than arguing about its direction |
 | Missing values | 3.2% of beach-days blank as a whole, 0.2% of single samples blank, and 3 days with no results at any beach. In the real data 95% of blanks are whole beach-days (672 of 20,462), and only 128 beach-days are partly blank, so scattering blanks across single samples would be wrong: it would knock four-site Sunnyside below the four-result minimum far more often than really happens |
 | Extreme errors | none; the real data's one extreme value is removed in cleaning, so the simulation matches cleaned data |
 
@@ -109,9 +116,11 @@ The simulation creates fake data with the same structure as the real data, with 
 | Baselines | common 1.3; moderate +0.2; high +0.4 | common 1.10; moderate +0.2; high +0.4 |
 | City-wide daily effect | carry-over 0.5, spread (SD) 0.20 | carry-over 0.5, spread (SD) 0.30 |
 | Beach daily effect | carry-over 0.5, spread (SD) 0.25 | carry-over 0.5, spread (SD) 0.34 |
-| Site noise | spread (SD) 0.30 | spread (SD) 0.50 |
+| Site noise | spread (SD) 0.30 | spread (SD) 0.60 |
 
-The starting values put too little spread on a single sample, which left only about a quarter of results at the detection limit and almost no exceedance days. The values used give 47% of results at the limit against 49% in the real data, 3.6% blank against 3.5%, and exceedance shares from 3.4% to 17% against 4.5% to 34%. The simulated beaches are closer together than the real ones because the built-in lifts of +0.2 and +0.4 are modest; that is a choice, not a failure to match.
+The starting values put too little spread on a single sample, which left only about a quarter of results at the detection limit and almost no exceedance days. The values used give 47% of results at the limit against 49% in the real data, 3.3% blank against 3.5%, and exceedance shares from 3.4% to 17% against 4.5% to 34%. The simulated beaches are closer together than the real ones because the built-in lifts of +0.2 and +0.4 are modest; that is a choice, not a failure to match.
+
+Site noise was raised again on 23 September 2026, from 0.50 to 0.60, once the ceiling was added. At 0.50 the simulated upper tail was too thin for a ceiling to bite: only 0.6% of results passed 1,000 where the real data has 1.1% before 2018. At 0.60 the tail matches, and the floor share barely moves. One mismatch remains: 0.7% of simulated results from 2018 to 2025 sit at the ceiling against 1.5% in the real data, because Toronto appears to cap some readings that would have fallen below 1,000. The direction of the bias is the same, so the simulation understates its size rather than misstating its nature.
 
 **Carry-over across seasons:** the carry-over runs within a season only. Each season starts with a fresh draw, because there is no water quality record over the winter to carry.
 
@@ -137,6 +146,7 @@ The beach groups are made up. They are not based on the real data.
   - E. coli values of 10 or more, in multiples of 10
   - share of blanks within a plausible range
   - share of results at the floor near one half
+  - the ceiling: readings above 1,000 present before 2018, a share of them at exactly 1,000 from 2018, and none above it from 2026
 
 ## Open decisions
 

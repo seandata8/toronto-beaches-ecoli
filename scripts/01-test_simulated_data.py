@@ -50,6 +50,12 @@ REPORTING_STEP = 10
 WARNING_THRESHOLD = 100
 MINIMUM_RESULTS = 4
 
+# The reporting ceiling the real data acquired in 2018, and which becomes complete
+# in 2026.
+CEILING_VALUE = 1_000
+CEILING_FIRST_YEAR = 2018
+CEILING_COMPLETE_YEAR = 2026
+
 # The two beaches given a high baseline by the simulation's seed. Changing the
 # seed or the group sizes will fail the last check below, which is intended: the
 # analysis is written against a known answer.
@@ -193,6 +199,15 @@ sites_per_beach = (
 blank_rows = simulated_data.height - results.height
 blanks_in_empty_beach_days = beach_days.filter(pl.col("nResults") == 0)["nSites"].sum()
 
+# The ceiling applies only from 2018, and completely from 2026, so the record is
+# split to check that each period behaves as designed.
+season = pl.col("collectionDate").dt.year()
+before_ceiling = results.filter(season < CEILING_FIRST_YEAR)
+after_ceiling = results.filter(
+    (season >= CEILING_FIRST_YEAR) & (season < CEILING_COMPLETE_YEAR)
+)
+fully_capped = results.filter(season >= CEILING_COMPLETE_YEAR)
+
 design = pl.DataFrame(
     {
         "check": [
@@ -203,6 +218,10 @@ design = pl.DataFrame(
             "correlation between consecutive days",
             "variance of exceedance days over its mean",
             "exceedance share of high beaches over common ones",
+            "share above the ceiling before 2018",
+            "share at the ceiling from 2018 to 2025",
+            "share above the ceiling from 2018 to 2025",
+            "share above the ceiling from 2026",
         ],
         "value": [
             (results["eColi"] == DETECTION_LIMIT).mean(),
@@ -212,11 +231,18 @@ design = pl.DataFrame(
             consecutive_days.select(pl.corr("logGeometricMean", "previousMean")).item(),
             per_season["exceedanceDays"].var() / per_season["exceedanceDays"].mean(),
             mean_exceedance(HIGH_BEACHES) - mean_exceedance(COMMON_BEACHES),
+            # Before 2018 nothing is capped, so high readings must survive.
+            (before_ceiling["eColi"] > CEILING_VALUE).mean(),
+            (after_ceiling["eColi"] == CEILING_VALUE).mean(),
+            # The 2018 ceiling is partial: some high readings still get through.
+            (after_ceiling["eColi"] > CEILING_VALUE).mean(),
+            # From 2026 it is complete, so nothing at all may exceed it.
+            (fully_capped["eColi"] > CEILING_VALUE).mean(),
         ],
         # Bounds are read from the real data where one exists, and from the
         # design otherwise.
-        "lower": [0.40, 0.02, 0.85, 0.90, 0.20, 1.50, 0.05],
-        "upper": [0.55, 0.05, 1.00, 1.00, 0.70, 20.0, 0.40],
+        "lower": [0.40, 0.02, 0.85, 0.90, 0.20, 1.50, 0.05, 0.005, 0.004, 0.0005, 0.0],
+        "upper": [0.55, 0.05, 1.00, 1.00, 0.70, 20.0, 0.40, 0.020, 0.020, 0.0100, 0.0],
     }
 )
 
