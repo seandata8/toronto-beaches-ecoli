@@ -2,6 +2,8 @@
 
 Things found while exploring that a reader would otherwise get wrong. Each one needs a sentence or two somewhere in the paper, not a section of its own.
 
+The check of the analysis against the simulated data, and the shrinkage the reporting floor and ceiling cause, are in `method_validation.md`.
+
 ## Samples against days
 
 The summary figure counts single samples; the analysis counts beach-days. These are different units and the paper should say so once, plainly, so the two figures do not look contradictory.

@@ -22,6 +22,7 @@ import polars as pl
 
 SEED = 853
 OUTPUT_PATH = Path("data/00-simulated_data/simulated_data.csv")
+UNCENSORED_OUTPUT_PATH = Path("data/00-simulated_data/simulated_data_uncensored.csv")
 
 rng = np.random.default_rng(SEED)
 
@@ -186,7 +187,12 @@ simulated_data = simulated_data.with_columns(
         pl.lit(DETECTION_LIMIT),
     )
     .cast(pl.Int64)
-    .alias("eColi")
+    .alias("eColi"),
+    # The value before the laboratory's floor and rounding. It is saved to a
+    # second file so that the analysis can be run on both: the difference
+    # measures how much the censoring shrinks the gaps between beaches, which is
+    # not something the real data can show.
+    (10 ** pl.col("logEColi")).alias("eColiUncensored"),
 ).drop("logEColi")
 
 # From 2018, three quarters of the results above 1,000 are reported as 1,000
@@ -237,7 +243,15 @@ simulated_data = (
         )
         .then(None)
         .otherwise(pl.col("eColi"))
-        .alias("eColi")
+        .alias("eColi"),
+        pl.when(
+            pl.col("blankBeachDay").fill_null(False)
+            | pl.Series(blank_sample)
+            | pl.col("collectionDate").is_in(blank_dates.tolist())
+        )
+        .then(None)
+        .otherwise(pl.col("eColiUncensored"))
+        .alias("eColiUncensored"),
     )
     .drop("blankBeachDay")
 )
@@ -245,8 +259,15 @@ simulated_data = (
 
 #### Save data ####
 OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
-simulated_data.write_csv(OUTPUT_PATH)
+simulated_data.drop("eColiUncensored").write_csv(OUTPUT_PATH)
 print(f"Saved {simulated_data.height} rows to {OUTPUT_PATH}")
+
+# The same draws without the floor, the rounding or the ceiling. Nothing but the
+# check in `scripts/06-validate_on_simulated_data.py` reads this file.
+simulated_data.drop("eColi").rename({"eColiUncensored": "eColi"}).write_csv(
+    UNCENSORED_OUTPUT_PATH
+)
+print(f"Saved the uncensored values to {UNCENSORED_OUTPUT_PATH}")
 
 
 #### Summarise what was built in ####
