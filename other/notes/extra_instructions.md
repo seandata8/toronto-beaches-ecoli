@@ -73,3 +73,7 @@
 - potential future work
 
 ### References
+
+### test suites
+- should have a script that tests the data (according to the rubric)
+- 

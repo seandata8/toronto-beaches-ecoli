@@ -97,19 +97,23 @@ The simulation creates fake data with the same structure as the real data, with 
 | – beach daily effect | one value per beach per day, which also partly carries over to the next day |
 | – site noise | independent for each sample |
 | Lab reporting | rounded to multiples of 10; anything below 10 reported as 10 |
-| Missing values | about 1% of samples blank at random, plus a few whole days blank at every beach |
+| Missing values | 3.2% of beach-days blank as a whole, 0.2% of single samples blank, and 3 days with no results at any beach. In the real data 95% of blanks are whole beach-days (672 of 20,462), and only 128 beach-days are partly blank, so scattering blanks across single samples would be wrong: it would knock four-site Sunnyside below the four-result minimum far more often than really happens |
 | Extreme errors | none; the real data's one extreme value is removed in cleaning, so the simulation matches cleaned data |
 
 **Carry-over:** each day's effect equals a fraction of the previous day's effect plus new random variation. The fraction sets how well one day predicts the next. For example, 0.5 means half of yesterday's deviation remains today.
 
-**Starting values** (log10 scale, adjusted so that about half of simulated results equal 10, as in the real data):
+**Values used** (log10 scale, tuned on 23 September 2026 so that the share of results at the detection limit, the exceedance shares and the spread between beaches resemble the real data). Each spread is the standard deviation of that part once the carry-over has settled, so the four parts add up as squares and changing a carry-over alters persistence without widening the series.
 
-| Setting | Value |
-|---|---|
-| Baselines | common 1.3; moderate +0.2; high +0.4 |
-| City-wide daily effect | carry-over 0.5, spread (SD) 0.20 |
-| Beach daily effect | carry-over 0.5, spread (SD) 0.25 |
-| Site noise | spread (SD) 0.30 |
+| Setting | Starting value | Value used |
+|---|---|---|
+| Baselines | common 1.3; moderate +0.2; high +0.4 | common 1.10; moderate +0.2; high +0.4 |
+| City-wide daily effect | carry-over 0.5, spread (SD) 0.20 | carry-over 0.5, spread (SD) 0.30 |
+| Beach daily effect | carry-over 0.5, spread (SD) 0.25 | carry-over 0.5, spread (SD) 0.34 |
+| Site noise | spread (SD) 0.30 | spread (SD) 0.50 |
+
+The starting values put too little spread on a single sample, which left only about a quarter of results at the detection limit and almost no exceedance days. The values used give 47% of results at the limit against 49% in the real data, 3.6% blank against 3.5%, and exceedance shares from 3.4% to 17% against 4.5% to 34%. The simulated beaches are closer together than the real ones because the built-in lifts of +0.2 and +0.4 are modest; that is a choice, not a failure to match.
+
+**Carry-over across seasons:** the carry-over runs within a season only. Each season starts with a fresh draw, because there is no water quality record over the winter to carry.
 
 The beach groups are made up. They are not based on the real data.
 
