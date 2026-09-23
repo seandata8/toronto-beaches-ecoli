@@ -1,0 +1,5 @@
+outcome,days,share
+correct warning,1002,0.052742393936203814
+correct all-clear,14584,0.7676597536582799
+unneeded warning,1712,0.09011474892093906
+missed warning,1700,0.08948310348457733
