@@ -46,6 +46,8 @@ rng = np.random.default_rng(853)
 # needs to stand out, and text stays in ink rather than taking the series colour.
 DATA_COLOUR = "#2a78d6"
 THRESHOLD_COLOUR = "#e34948"
+# Results over the threshold, which take the second slot of the same palette.
+ABOVE_THRESHOLD_COLOUR = "#eb6834"
 TEXT_PRIMARY = "#0b0b0b"
 TEXT_SECONDARY = "#52514e"
 GRID_COLOUR = "#e6e5e1"
@@ -264,6 +266,119 @@ figure.text(
 figure.tight_layout(rect=(0, 0, 1, 0.74))
 FIGURE_DIR.mkdir(parents=True, exist_ok=True)
 figure.savefig(FIGURE_DIR / "all-raw-results.png", bbox_inches="tight")
+
+
+#### Summary figure: results by order of magnitude, by beach ####
+# Every result except the one removed as an error, counted in bands of ten:
+# 1 to 10, 11 to 100, and so on. Bands rather than narrow bars because the
+# threshold sits exactly on a band edge, so the share of a beach's results above
+# 100 is the last two bars of its panel.
+# Sites 60W and GP6 are left out, as in the analysis: they cover 2026 only and sit
+# 14 to 16 km from the beaches they are listed under.
+summary_results = rest.filter(~pl.col("siteName").is_in(["60W", "GP6"]))
+
+# Four bands, not five: only four results in twenty years passed 10,000, so a
+# separate band for them would be an empty column in every panel.
+BAND_EDGES = [1, 2, 3]
+BAND_LABELS = ["1–10", "11–100", "101–\n1,000", "over\n1,000"]
+
+banded = (
+    summary_results.with_columns(
+        pl.col("logEColi")
+        .cut(BAND_EDGES, labels=[str(band) for band in range(len(BAND_LABELS))])
+        .cast(pl.Int8)
+        .alias("band")
+    )
+    .group_by("beachName", "band")
+    .agg(pl.len().alias("results"))
+)
+
+summary_order = (
+    banded.with_columns(
+        (pl.col("results") * (pl.col("band") >= 2)).alias("aboveThreshold")
+    )
+    .group_by("beachName")
+    .agg((pl.col("aboveThreshold").sum() / pl.col("results").sum()).alias("share"))
+    .sort("share", descending=True)["beachName"]
+    .to_list()
+)
+
+figure, axes = plt.subplots(2, 5, figsize=(10, 6.6), sharex=True, sharey=True)
+for axis, beach in zip(axes.flat, summary_order):
+    counts = (
+        banded.filter(pl.col("beachName") == beach)
+        .sort("band")
+        .select("band", "results")
+    )
+    heights = [
+        counts.filter(pl.col("band") == band)["results"].sum()
+        for band in range(len(BAND_LABELS))
+    ]
+    total = sum(heights)
+    # Bands above the threshold take their own hue, so a panel can be read
+    # without tracing back to the dashed line.
+    band_colours = [
+        ABOVE_THRESHOLD_COLOUR if band >= 2 else DATA_COLOUR
+        for band in range(len(BAND_LABELS))
+    ]
+    bars = axis.bar(range(len(BAND_LABELS)), heights, color=band_colours, width=0.72)
+
+    # The share of results in each band, so a reader can compare beaches with
+    # different numbers of samples without doing the arithmetic.
+    for bar, height in zip(bars, heights):
+        if height == 0:
+            continue
+        axis.annotate(
+            f"{height / total:.0%}" if height / total >= 0.005 else "<1%",
+            xy=(bar.get_x() + bar.get_width() / 2, height),
+            xytext=(0, 2),
+            textcoords="offset points",
+            ha="center",
+            fontsize=7,
+            color=TEXT_SECONDARY,
+        )
+
+    axis.set_title(fill(beach, width=18), fontsize=9.5, color=TEXT_PRIMARY, loc="left")
+    axis.set_xticks(range(len(BAND_LABELS)))
+    axis.set_xticklabels(BAND_LABELS, fontsize=7.5)
+    axis.grid(axis="y", color=GRID_COLOUR, linewidth=0.5)
+    axis.set_axisbelow(True)
+    # The threshold falls on the edge between the second and third band.
+    axis.axvline(1.5, color=TEXT_PRIMARY, linewidth=1, linestyle=(0, (6, 4)), zorder=3)
+
+figure.text(
+    0.008,
+    1.0,
+    "How high the results get, by beach",
+    ha="left",
+    va="top",
+    fontsize=13,
+    color=TEXT_PRIMARY,
+)
+figure.text(
+    0.008,
+    0.955,
+    fill(
+        f"Every result the City has published ({summary_results.height:,}), with each bar"
+        " labelled by its share of that beach's results. The reading of 6,191,768 removed as an"
+        " error is left out, as are two sites added in 2026 that sit far from the beaches they"
+        " are listed under. The orange bars, right of the dashed line, are the results above 100"
+        " E. coli per 100 mL, the limit the City of Toronto sets for safe swimming. Panels run"
+        " from the beach with the largest share above that limit to the smallest. Each bar counts"
+        " single samples rather than days: a beach is judged on the average of its five or six"
+        " samples, and by that measure Marie Curtis Park East Beach was over the limit on 658 of"
+        " its 1,927 sampled days, or 34%, against the 36% of its samples shown here.",
+        width=CAPTION_WIDTH,
+    ),
+    ha="left",
+    va="top",
+    fontsize=9.5,
+    color=TEXT_SECONDARY,
+)
+figure.supylabel("Number of results", fontsize=10, color=TEXT_SECONDARY)
+figure.supxlabel("E. coli per 100 mL", fontsize=10, color=TEXT_SECONDARY)
+figure.tight_layout(rect=(0.004, 0, 1, 0.78))
+figure.savefig(FIGURE_DIR / "results-by-magnitude.png", bbox_inches="tight")
 
 
 #### Graph 1: every sample result ####
