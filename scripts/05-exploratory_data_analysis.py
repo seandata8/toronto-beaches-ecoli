@@ -1,14 +1,14 @@
 #### Preamble ####
-# Purpose: Draws the two figures that show the whole dataset: every published
-# result over time, including the one that cleaning removes, and how high the
-# results get at each beach.
+# Purpose: Draws the three figures that show the whole dataset: every published
+# result over time, including the one that cleaning removes; how high the results
+# get at each beach; and every beach-day, which is the unit the analysis uses.
 # Author: Sean Murphy
 # Date: 23 September 2026
 # Contact: seandata8@gmail.com
 # License: MIT
 # Pre-requisites:
 # - `polars`, `numpy` and `matplotlib` must be installed
-# - Run `uv run scripts/02-download_data.py` first
+# - Run `uv run scripts/02-download_data.py` and `scripts/03-clean_data.py` first
 # - Run from the project root: uv run scripts/05-exploratory_data_analysis.py
 
 
@@ -24,9 +24,15 @@ import polars as pl
 from matplotlib.ticker import FixedLocator, FuncFormatter
 
 RAW_DATA_PATH = "data/01-raw_data/raw_data.csv"
+ANALYSIS_DATA_PATH = "data/02-analysis_data/analysis_data.csv"
 FIGURE_DIR = Path("other/explore/figures")
 
 WARNING_THRESHOLD = 100
+DETECTION_LIMIT = 10
+
+# The daily geometric mean needs at least four results: four, not five, so that
+# Sunnyside's four sites are included.
+MINIMUM_RESULTS = 4
 
 # Sampling is daily and results are reported in steps of ten, so points land on a
 # grid and pile up. Spreading them sideways by a few days makes the pile-ups
@@ -216,13 +222,14 @@ figure.savefig(FIGURE_DIR / "all-raw-results.png", bbox_inches="tight")
 
 
 #### Summary figure: results by order of magnitude, by beach ####
-# Every result except the one removed as an error, counted in bands of ten:
-# 1 to 10, 11 to 100, and so on. Bands rather than narrow bars because the
-# threshold sits exactly on a band edge, so the share of a beach's results above
-# 100 is the last two bars of its panel.
-# Sites 60W and GP6 are left out, as in the analysis: they cover 2026 only and sit
-# 14 to 16 km from the beaches they are listed under.
-summary_results = rest.filter(~pl.col("siteName").is_in(["60W", "GP6"]))
+# The cleaned data, so that what is drawn is exactly what the analysis uses, and
+# the exclusions live in one place rather than being repeated here.
+# Results are counted in bands of ten: 1 to 10, 11 to 100, and so on. Bands rather
+# than narrow bars because the threshold sits on a band edge, so the share of a
+# beach's results above 100 is the last two bars of its panel.
+summary_results = pl.read_csv(ANALYSIS_DATA_PATH, try_parse_dates=True).with_columns(
+    pl.col("eColi").log10().alias("logEColi")
+)
 
 # Four bands, not five: only four results in twenty years passed 10,000, so a
 # separate band for them would be an empty column in every panel.
@@ -306,10 +313,11 @@ figure.text(
     0.008,
     0.955,
     fill(
-        f"Every result the City has published ({summary_results.height:,}), with each bar"
-        " labelled by its share of that beach's results. The reading of 6,191,768 removed as an"
-        " error is left out, as are two sites added in 2026 that sit far from the beaches they"
-        " are listed under. The orange bars, right of the dashed line, are the results above 100"
+        f"Every result the analysis uses ({summary_results.height:,}), with each bar labelled by"
+        " its share of that beach's results. Cleaning leaves out the reading of 6,191,768 removed"
+        " as an error, two sites added in 2026 that sit far from the beaches they are listed"
+        " under, and dates outside the sampling season."
+        " The orange bars, right of the dashed line, are the results above 100"
         " E. coli per 100 mL, the limit the City of Toronto sets for safe swimming. Panels run"
         " from the beach with the largest share above that limit to the smallest. Each bar counts"
         " single samples rather than days: a beach is judged on the average of its five or six"
@@ -327,5 +335,136 @@ figure.supxlabel("E. coli per 100 mL", fontsize=10, color=TEXT_SECONDARY)
 figure.tight_layout(rect=(0.004, 0, 1, 0.78))
 figure.savefig(FIGURE_DIR / "results-by-magnitude.png", bbox_inches="tight")
 
-print(f"Saved two figures to {FIGURE_DIR}")
-print(f"Results plotted: {rest.height:,}")
+
+#### Day-level figure: every beach-day the analysis uses ####
+# A beach is judged on the geometric mean of its samples for the day, so this is
+# the unit the analysis works in, and the one the threshold applies to.
+daily_means = (
+    summary_results.group_by("beachName", "collectionDate")
+    .agg(
+        pl.col("logEColi").mean().alias("logGeometricMean"),
+        pl.len().alias("nResults"),
+    )
+    # Four results, not five, so that Sunnyside's four sites are included.
+    .filter(pl.col("nResults") >= MINIMUM_RESULTS)
+    .with_columns(
+        (pl.col("logGeometricMean") > np.log10(WARNING_THRESHOLD)).alias("overLimit")
+    )
+)
+
+day_order = (
+    daily_means.group_by("beachName")
+    .agg(pl.col("overLimit").mean().alias("share"))
+    .sort("share")["beachName"]
+    .to_list()
+)
+
+figure, axis = plt.subplots(figsize=(10, 6.0))
+for row, beach in enumerate(day_order):
+    beach_days = daily_means.filter(pl.col("beachName") == beach)
+    means = beach_days["logGeometricMean"].to_numpy()
+    over = beach_days["overLimit"].to_numpy()
+    height = row + rng.uniform(-0.32, 0.32, size=means.size)
+    # Days over the limit carry their own hue. Position relative to the line says
+    # the same thing, so colour is not doing the work alone.
+    for selected, colour, opacity in (
+        (~over, DATA_COLOUR, 0.22),
+        (over, ABOVE_THRESHOLD_COLOUR, 0.4),
+    ):
+        axis.scatter(
+            means[selected],
+            height[selected],
+            s=10,
+            alpha=opacity,
+            color=colour,
+            linewidths=0,
+            rasterized=True,
+        )
+    axis.text(
+        1.005,
+        row,
+        f"{over.mean():.0%}",
+        transform=axis.get_yaxis_transform(),
+        va="center",
+        fontsize=9,
+        color=ABOVE_THRESHOLD_COLOUR,
+    )
+
+axis.axvline(
+    np.log10(WARNING_THRESHOLD),
+    color=TEXT_PRIMARY,
+    linewidth=1,
+    linestyle=(0, (6, 4)),
+    zorder=3,
+)
+axis.xaxis.set_major_locator(FixedLocator(np.log10([10, 100, 1_000])))
+axis.xaxis.set_major_formatter(count_formatter)
+# Minor ticks inside each decade, so that the discrete values a geometric mean of
+# five multiples of ten can take are placeable by eye.
+axis.xaxis.set_minor_locator(
+    FixedLocator(np.log10([20, 30, 50, 200, 300, 500, 2_000, 3_000]))
+)
+axis.xaxis.set_minor_formatter(count_formatter)
+axis.tick_params(axis="x", which="minor", labelsize=7.5)
+
+# The 17 days whose geometric mean falls below the reporting floor stretch the
+# axis down to about 2 and squeeze everything else into the right two thirds. The
+# axis starts just under the floor instead, and the caption says how many days
+# that leaves out.
+below_floor = daily_means.filter(
+    pl.col("logGeometricMean") < np.log10(DETECTION_LIMIT)
+).height
+axis.set_xlim(np.log10(9), daily_means["logGeometricMean"].max() + 0.05)
+axis.set_yticks(range(len(day_order)))
+axis.set_yticklabels(day_order, fontsize=10, color=TEXT_PRIMARY)
+axis.set_ylim(-0.7, len(day_order) - 0.3)
+axis.grid(axis="x", color=GRID_COLOUR, linewidth=0.5)
+axis.set_axisbelow(True)
+axis.tick_params(axis="y", length=0)
+axis.text(
+    1.005,
+    len(day_order) - 0.4,
+    "Share of days\nover the limit",
+    transform=axis.get_yaxis_transform(),
+    va="bottom",
+    fontsize=9,
+    color=TEXT_SECONDARY,
+)
+
+figure.text(
+    0.008,
+    1.0,
+    "Every beach-day, by beach",
+    ha="left",
+    va="top",
+    fontsize=13,
+    color=TEXT_PRIMARY,
+)
+figure.text(
+    0.008,
+    0.955,
+    fill(
+        "One point is the geometric mean of a beach's samples on one day, the figure the City's"
+        f" limit applies to ({daily_means.height:,} days in total). Days with fewer than four"
+        " results are left out. Points are spread vertically so that they can be counted; the"
+        " value itself is never moved. Orange points, right of the dashed line, are the days"
+        " above 100 E. coli per 100 mL. Half of all samples are reported at 10, the lowest the"
+        " laboratory measures, so the column at 10 is the days on which every sample was at that"
+        " floor, and the stripes just above it are the values a geometric mean of four to six"
+        f" multiples of ten can take. The {below_floor} days whose mean falls below 10 are off"
+        " the left of the axis.",
+        width=CAPTION_WIDTH,
+    ),
+    ha="left",
+    va="top",
+    fontsize=9.5,
+    color=TEXT_SECONDARY,
+)
+axis.set_xlabel("E. coli per 100 mL (log scale)", fontsize=10, color=TEXT_SECONDARY)
+figure.tight_layout(rect=(0, 0, 1, 0.84))
+figure.savefig(FIGURE_DIR / "all-beach-days.png", bbox_inches="tight")
+
+print(f"Saved three figures to {FIGURE_DIR}")
+print(f"Raw results plotted: {rest.height:,}")
+print(f"Cleaned results plotted: {summary_results.height:,}")
+print(f"Beach-days plotted: {daily_means.height:,}")
