@@ -1,15 +1,14 @@
 #### Preamble ####
-# Purpose: Draws the two graphs that show the whole dataset: every sample result,
-# and every beach-day geometric mean. Written against the simulated data so that
-# the plotting code is ready before the real data is cleaned; change
-# DATA_PATH to the analysis data once `scripts/03-clean_data.py` exists.
+# Purpose: Draws the two figures that show the whole dataset: every published
+# result over time, including the one that cleaning removes, and how high the
+# results get at each beach.
 # Author: Sean Murphy
 # Date: 23 September 2026
 # Contact: seandata8@gmail.com
 # License: MIT
 # Pre-requisites:
 # - `polars`, `numpy` and `matplotlib` must be installed
-# - Run `uv run scripts/00-simulate_data.py` first
+# - Run `uv run scripts/02-download_data.py` first
 # - Run from the project root: uv run scripts/05-exploratory_data_analysis.py
 
 
@@ -25,12 +24,9 @@ import polars as pl
 from matplotlib.ticker import FixedLocator, FuncFormatter
 
 RAW_DATA_PATH = "data/01-raw_data/raw_data.csv"
-DATA_PATH = "data/00-simulated_data/simulated_data.csv"
 FIGURE_DIR = Path("other/explore/figures")
 
 WARNING_THRESHOLD = 100
-DETECTION_LIMIT = 10
-MINIMUM_RESULTS = 4
 
 # Sampling is daily and results are reported in steps of ten, so points land on a
 # grid and pile up. Spreading them sideways by a few days makes the pile-ups
@@ -69,41 +65,8 @@ plt.rcParams.update(
 )
 
 
-#### Read data ####
-results = (
-    pl.read_csv(DATA_PATH, try_parse_dates=True)
-    .drop_nulls("eColi")
-    .with_columns(pl.col("eColi").log10().alias("logEColi"))
-)
-
-# The unit the analysis uses: one geometric mean per beach per day, computed only
-# when at least four results are available.
-daily_means = (
-    results.group_by("beachName", "collectionDate")
-    .agg(
-        pl.col("logEColi").mean().alias("logGeometricMean"),
-        pl.len().alias("nResults"),
-    )
-    .filter(pl.col("nResults") >= MINIMUM_RESULTS)
-)
-
-# Beaches are ordered by how often they exceeded the threshold, so both graphs
-# read top to bottom as worst to cleanest.
-beach_order = (
-    daily_means.group_by("beachName")
-    .agg(
-        (pl.col("logGeometricMean") > np.log10(WARNING_THRESHOLD))
-        .mean()
-        .alias("exceedanceShare")
-    )
-    .sort("exceedanceShare", descending=True)["beachName"]
-    .to_list()
-)
-
-
 #### Shared axis formatting ####
 # The x axis is log10 of the count, labelled with the counts themselves.
-TICK_VALUES = [10, 100, 1_000, 10_000]
 count_formatter = FuncFormatter(lambda value, _: f"{10**value:,.0f}")
 
 
@@ -117,22 +80,6 @@ def to_significant_figures(value: float, digits: int = 2) -> float:
         return 0.0
     magnitude = math.floor(math.log10(abs(value)))
     return round(value, -(magnitude - digits + 1))
-
-
-def style_count_axis(axis, ticks: list[int] = TICK_VALUES) -> None:
-    """Label a log10 axis with counts, and mark the threshold.
-
-    The small panels take fewer ticks than the full-width figures, because at
-    this type size "1,000" and "10,000" would otherwise run together.
-    """
-    axis.xaxis.set_major_locator(FixedLocator(np.log10(ticks)))
-    axis.xaxis.set_major_formatter(count_formatter)
-    axis.axvline(
-        np.log10(WARNING_THRESHOLD),
-        color=THRESHOLD_COLOUR,
-        linewidth=1,
-        zorder=3,
-    )
 
 
 #### Graph 0: every raw result, including the one that cleaning removes ####
@@ -380,148 +327,5 @@ figure.supxlabel("E. coli per 100 mL", fontsize=10, color=TEXT_SECONDARY)
 figure.tight_layout(rect=(0.004, 0, 1, 0.78))
 figure.savefig(FIGURE_DIR / "results-by-magnitude.png", bbox_inches="tight")
 
-
-#### Graph 1: every sample result ####
-# A histogram rather than a density: results are reported in steps of ten, so the
-# bars are the data rather than a smoothing of it, and the reporting floor stays
-# visible as the single tall bar it is.
-bins = np.arange(0.95, results["logEColi"].max() + 0.1, 0.1)
-
-figure, axes = plt.subplots(2, 5, figsize=(9, 5.0), sharex=True, sharey=True)
-for axis, beach in zip(axes.flat, beach_order):
-    beach_results = results.filter(pl.col("beachName") == beach)
-    axis.hist(beach_results["logEColi"], bins=bins, color=DATA_COLOUR, linewidth=0)
-    style_count_axis(axis, ticks=[10, 100, 1_000])
-    # Names are wrapped rather than shortened, so that a panel title never runs
-    # into the panel beside it.
-    axis.set_title(
-        fill(beach, width=18),
-        fontsize=9.5,
-        color=TEXT_PRIMARY,
-        loc="left",
-        pad=4,
-    )
-    axis.grid(axis="y", color=GRID_COLOUR, linewidth=0.5)
-    axis.set_axisbelow(True)
-    axis.set_xlim(bins[0], bins[-1])
-
-figure.text(
-    0.008,
-    1.0,
-    "Every E. coli result, by beach",
-    ha="left",
-    va="top",
-    fontsize=13,
-    color=TEXT_PRIMARY,
-)
-figure.text(
-    0.008,
-    0.955,
-    fill(
-        "Each bar counts the results in one narrow band of the log scale. Half of all results are"
-        f" reported at {DETECTION_LIMIT}, the lowest the laboratory can measure, which is the tall"
-        f" bar at the left of every panel. The red line marks {WARNING_THRESHOLD} per 100 mL, above"
-        " which a beach is posted.",
-        width=CAPTION_WIDTH,
-    ),
-    ha="left",
-    va="top",
-    fontsize=9.5,
-    color=TEXT_SECONDARY,
-)
-figure.supxlabel("E. coli per 100 mL (log scale)", fontsize=10, color=TEXT_SECONDARY)
-figure.supylabel("Number of results", fontsize=10, color=TEXT_SECONDARY)
-figure.tight_layout(rect=(0.004, 0, 1, 0.86))
-
-FIGURE_DIR.mkdir(parents=True, exist_ok=True)
-figure.savefig(FIGURE_DIR / "all-results-by-beach.png", bbox_inches="tight")
-
-
-#### Graph 2: every beach-day geometric mean ####
-# One point per beach-day, spread vertically at random so that overlapping points
-# stay countable. This plots the actual unit the analysis uses.
-threshold = np.log10(WARNING_THRESHOLD)
-
-figure, axis = plt.subplots(figsize=(9, 5.0))
-for row, beach in enumerate(reversed(beach_order)):
-    beach_means = daily_means.filter(pl.col("beachName") == beach)[
-        "logGeometricMean"
-    ].to_numpy()
-    height = row + rng.uniform(-0.32, 0.32, size=beach_means.size)
-    exceeds = beach_means > threshold
-    # Days over the threshold are the subject of the paper, so they carry their
-    # own colour. Position relative to the line says the same thing, so the
-    # colour is not doing the work alone.
-    for selected, colour, opacity in (
-        (~exceeds, DATA_COLOUR, 0.10),
-        (exceeds, THRESHOLD_COLOUR, 0.30),
-    ):
-        axis.scatter(
-            beach_means[selected],
-            height[selected],
-            s=1.5,
-            alpha=opacity,
-            color=colour,
-            linewidths=0,
-            rasterized=True,
-        )
-    # The share of days over the threshold, labelled directly rather than left
-    # for the reader to judge from the density of the points.
-    axis.text(
-        1.005,
-        row,
-        f"{exceeds.mean():.0%}",
-        transform=axis.get_yaxis_transform(),
-        va="center",
-        fontsize=10,
-        color=THRESHOLD_COLOUR,
-    )
-
-style_count_axis(axis)
-axis.set_yticks(range(len(beach_order)))
-axis.set_yticklabels(list(reversed(beach_order)), fontsize=10, color=TEXT_PRIMARY)
-axis.set_ylim(-0.7, len(beach_order) - 0.3)
-axis.grid(axis="x", color=GRID_COLOUR, linewidth=0.5)
-axis.set_axisbelow(True)
-axis.tick_params(axis="y", length=0)
-axis.text(
-    1.005,
-    len(beach_order) - 0.35,
-    "Share of\ndays over",
-    transform=axis.get_yaxis_transform(),
-    va="bottom",
-    fontsize=9,
-    color=TEXT_SECONDARY,
-)
-
-figure.text(
-    0.008,
-    1.0,
-    "Every beach-day, by beach",
-    ha="left",
-    va="top",
-    fontsize=13,
-    color=TEXT_PRIMARY,
-)
-figure.text(
-    0.008,
-    0.955,
-    fill(
-        "One point is the geometric mean of a beach's samples on one day, spread vertically so that"
-        f" points can be counted ({daily_means.height:,} in total). Red points are the days above"
-        f" {WARNING_THRESHOLD} per 100 mL, the threshold for posting a beach.",
-        width=CAPTION_WIDTH,
-    ),
-    ha="left",
-    va="top",
-    fontsize=9.5,
-    color=TEXT_SECONDARY,
-)
-axis.set_xlabel("E. coli per 100 mL (log scale)", fontsize=10, color=TEXT_SECONDARY)
-figure.tight_layout(rect=(0, 0, 1, 0.86))
-
-figure.savefig(FIGURE_DIR / "all-beach-days.png", bbox_inches="tight")
-
 print(f"Saved two figures to {FIGURE_DIR}")
-print(f"Results plotted: {results.height:,}")
-print(f"Beach-days plotted: {daily_means.height:,}")
+print(f"Results plotted: {rest.height:,}")
