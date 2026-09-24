@@ -4,6 +4,20 @@ Produced 23 September 2026 by `scripts/07-analyse_data.py`, using the functions 
 
 19,662 beach-days, 2007 to 2026.
 
+## Executive summary
+
+**Which beach you choose matters far more than which day you go.**
+
+Two beaches are in a class of their own. Marie Curtis Park East was over Toronto's limit on 34.1% of its sampled days and Sunnyside on 31.8%, against 4.4% at Gibraltar Point: roughly eight times as often. Both sit 0.34 above the daily average on the log10 scale, meaning more than twice the E. coli of the average beach on the same day. They cannot be told apart from each other, and every other beach is clearly below them. Of the 45 pairs of beaches, 32 differ after correcting for the number of comparisons.
+
+The ranking survives every check. Across seasons the two dirtiest beaches range from 22% to 60% and from 21% to 47% of days, while the cleanest never pass 12% in any single season, so the groups never overlap. Splitting the record at 2018, when the reporting ceiling appeared, barely moves the numbers. And because the laboratory's floor and ceiling shrink differences by about a third, the true gaps are wider than these figures say.
+
+Against that, the daily warning is close to a coin toss. Results take about a day, so a posting describes yesterday's water. Of the days actually over the limit, 63% were not caught; of the warnings that would be posted, 63% were unnecessary. One day's reading explains about 14% of the variation in the next.
+
+So a swimmer is better served by knowing which beach they are standing on than by yesterday's reading of it.
+
+Three caveats travel with these numbers: they are days over the limit as computed here rather than recorded closures, the estimated gaps are floors rather than best guesses, and days over the limit cluster heavily, which is why the uncertainty is calculated by month rather than by day.
+
 ## Question 1: some beaches go over the limit far more often than others
 
 | Beach | Days over the limit | Share | Model estimate (log10) |
