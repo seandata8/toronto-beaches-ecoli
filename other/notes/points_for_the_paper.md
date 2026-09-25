@@ -8,22 +8,22 @@ The check of the analysis against the simulated data, and the shrinkage the repo
 
 The summary figure counts single samples; the analysis counts beach-days. These are different units and the paper should say so once, plainly, so the two figures do not look contradictory.
 
-The gap between them is small, and that is itself worth reporting:
+The gap between them is small, and that is itself worth reporting. Day counts are from `other/results/exceedance-by-beach.csv`; sample shares are from `data/02-analysis_data/analysis_data.csv` (checked 25 September 2026):
 
 | Beach | Samples over 100 | Days over 100 | Days over the limit |
 |---|---|---|---|
-| Marie Curtis Park East | 35.4% | 34.1% | 658 of 1,927 |
-| Sunnyside | 33.7% | 31.9% | 636 of 1,993 |
-| Kew Balmy | 19.3% | 15.7% | 319 of 2,030 |
-| Centre Island | 19.4% | 13.9% | 268 of 1,930 |
-| Bluffer's | 13.0% | 11.5% | 231 of 2,008 |
-| Ward's Island | 10.3% | 9.1% | 177 of 1,953 |
-| Woodbine | 10.8% | 8.8% | 179 of 2,024 |
-| Cherry | 8.9% | 7.4% | 150 of 2,022 |
-| Hanlan's Point | 8.1% | 6.8% | 131 of 1,940 |
-| Gibraltar Point | 5.9% | 4.5% | 86 of 1,912 |
+| Marie Curtis Park East | 35.4% | 34.1% | 657 of 1,925 |
+| Sunnyside | 33.6% | 31.8% | 632 of 1,986 |
+| Kew Balmy | 19.3% | 15.7% | 316 of 2,011 |
+| Centre Island | 19.4% | 13.9% | 268 of 1,929 |
+| Bluffer's | 12.9% | 11.3% | 226 of 2,001 |
+| Ward's Island | 10.3% | 9.1% | 177 of 1,952 |
+| Woodbine | 10.7% | 8.8% | 177 of 2,005 |
+| Cherry | 8.9% | 7.4% | 148 of 2,003 |
+| Hanlan's Point | 8.0% | 6.7% | 130 of 1,939 |
+| Gibraltar Point | 5.9% | 4.4% | 85 of 1,911 |
 
-Averaging five or six sites might have been expected to pull most days back under the limit. It does not: the day share sits 1 to 5 points below the sample share, never half. A beach's sites are highly correlated, so when one is dirty the others usually are too, and the geometric mean tracks the samples rather than smoothing them away. The gap is widest at the middle beaches (Centre Island loses 5.5 points) and narrowest at the dirtiest.
+Averaging five or six sites might have been expected to pull most days back under the limit. It does not: the day share sits 1.2 to 5.5 points below the sample share, never half. A beach's sites are highly correlated, so when one is dirty the others usually are too, and the geometric mean tracks the samples rather than smoothing them away. The gap is widest at two of the middle beaches, Centre Island (5.5 points) and Kew Balmy (3.6), and 1.2 to 1.9 points at the other eight.
 
 ## "Over the limit" is not "closed"
 
