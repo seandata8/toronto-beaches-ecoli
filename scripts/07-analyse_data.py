@@ -131,6 +131,28 @@ posted = agreement.filter(
     pl.col("outcome").is_in(["correct warning", "unneeded warning"])
 )["days"].sum()
 
+# The same four outcomes as a two-by-two table for the paper: what yesterday's
+# result says in the rows, what today's water was in the columns, and each box
+# as a count and a share of all pairs.
+outcome_days = dict(agreement.select("outcome", "days").iter_rows())
+all_pairs = sum(outcome_days.values())
+confusion = pl.DataFrame(
+    {
+        "advice": ["Warning", "All-clear"],
+        "overTodayDays": [
+            outcome_days["correct warning"],
+            outcome_days["missed warning"],
+        ],
+        "underTodayDays": [
+            outcome_days["unneeded warning"],
+            outcome_days["correct all-clear"],
+        ],
+    }
+).with_columns(
+    (pl.col("overTodayDays") / all_pairs).alias("overTodayShare"),
+    (pl.col("underTodayDays") / all_pairs).alias("underTodayShare"),
+)
+
 
 #### Report ####
 def show(frame: pl.DataFrame) -> None:
@@ -221,6 +243,17 @@ print(f"  of which yesterday's result caught: {caught:,} ({caught / over_today:.
 print(f"Warnings yesterday's result would post: {posted:,}")
 print(f"  of which were needed: {caught:,} ({caught / posted:.0%})")
 print(
+    f"Share of days over the limit: {over_today / all_pairs:.0%} on any day,"
+    f" {caught / posted:.0%} after a warning,"
+    f" {outcome_days['missed warning'] / (all_pairs - posted):.0%} after an all-clear"
+)
+print("\nAs a two-by-two table (shares are of all pairs)")
+show(
+    confusion.with_columns(
+        pl.col("overTodayShare").round(3), pl.col("underTodayShare").round(3)
+    )
+)
+print(
     f"\nCorrelation between one day and the next: {correlation['all pairs']:.3f}"
     f"\n  excluding pairs with both days at the floor: "
     f"{correlation['excluding pairs with both days at the floor']:.3f}"
@@ -237,6 +270,7 @@ differences.write_csv(RESULTS_DIR / "beach-pairwise-differences.csv")
 inflation.write_csv(RESULTS_DIR / "beach-model-standard-errors.csv")
 grouping_check.write_csv(RESULTS_DIR / "beach-pairwise-grouping-check.csv")
 agreement.write_csv(RESULTS_DIR / "warning-agreement.csv")
+confusion.write_csv(RESULTS_DIR / "warning-confusion-matrix.csv")
 print(f"\nSaved the tables to {RESULTS_DIR}")
 
 

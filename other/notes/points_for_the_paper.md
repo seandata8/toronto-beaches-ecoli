@@ -61,3 +61,14 @@ Two figures carry the answer: every beach-day (`paper/figures/all-beach-days.png
 - **The gaps are understated (one sentence, also in the figure caption).** Because results are reported only between 10 and 1,000, the model's gaps come out at about 65% of their true size in the simulation; the direction is never reversed.
 - **Pairwise tests (one sentence; the table in an appendix at most).** Marie Curtis and Sunnyside differ from every other beach but not from each other; 31 or 32 of the 45 pairs differ depending on how days are grouped, and most of the rest are among the lower beaches, too close to separate.
 - **Model rank vs share of days.** Centre Island ranks above Kew Balmy in the model (1.22× against 1.09×) but below it in share of days over the limit (13.9% against 15.7%). The model compares typical levels on the same days; the share counts how often 100 is crossed. One sentence so a reader comparing the two figures is not confused.
+
+## Question 2: what the paper needs
+
+A two-by-two table from `other/results/warning-confusion-matrix.csv`: rows are yesterday's advice (warning, all-clear), columns are today's water (over, under the limit), each box a count with its share of all pairs. No total row or column; the caption gives the total instead ("18,998 pairs of consecutive days at the same beach, 2007–2026").
+
+| | Today over the limit | Today under the limit |
+|---|---|---|
+| **Warning** | 1,002 (5.3%) | 1,712 (9.0%) |
+| **All-clear** | 1,700 (8.9%) | 14,584 (76.8%) |
+
+The text gives the two numbers a swimmer cares about, which are ratios between boxes rather than boxes themselves: a warning based on yesterday's samples catches 37% of the days that are over the limit, and 37% of such warnings are needed. For context, 14% of days are over the limit on any day, 37% after a warning and 10% after an all-clear, so a warning raises the chance about 3.5-fold. All printed by `scripts/07-analyse_data.py`. Leave out overall accuracy (82%): a rule that never warns scores 86%, because most days are clean, so it misleads.
