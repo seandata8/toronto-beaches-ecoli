@@ -16,7 +16,7 @@ Against that, the daily warning is a weak guide. Results take about a day, so a 
 
 So a swimmer is better served by knowing which beach they are standing on than by yesterday's reading of it.
 
-Three caveats travel with these numbers: they are days over the limit as computed here rather than recorded closures, the estimated gaps are floors rather than best guesses, and days over the limit cluster heavily, which is why the uncertainty is calculated by month rather than by day.
+Three caveats travel with these numbers: they are days over the limit as computed here rather than recorded closures, the estimated gaps are floors rather than best guesses, and consecutive days are related, which is why the uncertainty treats days in the same month as related rather than treating every day as independent.
 
 ## Question 1: some beaches go over the limit far more often than others
 
@@ -45,7 +45,9 @@ Three caveats travel with these numbers: they are days over the limit as compute
 
 **The gaps are understated.** The simulation showed the reporting floor and ceiling leave about 65% of a true gap, so the real differences between beaches are larger than these numbers say. The direction is never reversed.
 
-**Days over the limit cluster heavily**: their variance across beach-years is 8.7 times the mean, where a Poisson distribution would give 1. A wet week posts a beach for several days running, so counting days as independent trials would understate the uncertainty badly. This is why the model's standard errors are clustered by month.
+**Consecutive days are related, so the standard errors group days by calendar month.** A wet week raises a beach for several days running: one day's level correlates with the next at 0.42 (Question 2). Fitting the same model with every day treated as independent gives standard errors 1.3 to 2.3 times smaller (median 1.9; `other/results/beach-model-standard-errors.csv`). So the grouping roughly doubles the width of the intervals, and the data carry about as much information as a quarter as many independent days. Ignoring it would make the p-values far too small.
+
+(An earlier version of this note used a Poisson check instead: days over the limit per beach per year had a variance 8.7 times their mean. That number pooled all ten beaches, so it mostly measured the differences between beaches, not runs of days; within single beaches the ratio is 1.2 to 4.8, and it also mixes wet years with dry ones. It was replaced on 25 September 2026.)
 
 ## Question 2: yesterday's result is a weak guide to today
 

@@ -71,17 +71,16 @@ def exceedance_by_beach_and_year(daily: pl.DataFrame) -> pl.DataFrame:
     )
 
 
-def overdispersion(daily: pl.DataFrame) -> float:
-    """Variance over mean of the days above the limit, per beach per year.
-
-    A Poisson distribution has variance equal to its mean, so a ratio near 1
-    would mean days over the limit arrive independently at a steady rate. A
-    larger ratio means they cluster, which is what a wet week does.
-    """
-    per_year = daily.group_by("beachName", "year").agg(
-        pl.col("overLimit").sum().alias("daysOverLimit")
+def _relative_to_day(daily: pl.DataFrame) -> pl.DataFrame:
+    """Each beach-day's log10 geometric mean minus that day's city-wide average."""
+    return daily.with_columns(
+        (
+            pl.col("logGeometricMean")
+            - pl.col("logGeometricMean").mean().over("collectionDate")
+        ).alias("relativeToDay"),
+        # Patsy needs names it can put in a formula.
+        pl.col("beachName").str.replace_all(r"[^A-Za-z]", "").alias("beach"),
     )
-    return per_year["daysOverLimit"].var() / per_year["daysOverLimit"].mean()
 
 
 def fit_beach_model(daily: pl.DataFrame):
@@ -102,17 +101,39 @@ def fit_beach_model(daily: pl.DataFrame):
     know about, so the reported degrees of freedom are slightly optimistic. With
     96 clusters the effect on the intervals is small.
     """
-    prepared = daily.with_columns(
-        (
-            pl.col("logGeometricMean")
-            - pl.col("logGeometricMean").mean().over("collectionDate")
-        ).alias("relativeToDay"),
-        # Patsy needs names it can put in a formula.
-        pl.col("beachName").str.replace_all(r"[^A-Za-z]", "").alias("beach"),
-    )
+    prepared = _relative_to_day(daily)
     return smf.ols("relativeToDay ~ beach - 1", data=prepared.to_pandas()).fit(
         cov_type="cluster",
         cov_kwds={"groups": prepared["monthYear"].to_list()},
+    )
+
+
+def standard_error_inflation(daily: pl.DataFrame) -> pl.DataFrame:
+    """How much wider each beach's standard error is when days are grouped by month.
+
+    The same model is fitted twice: once treating every beach-day as independent,
+    and once treating days in the same calendar month as related. The estimates
+    are identical; only the standard errors differ. A ratio near 1 would mean
+    consecutive days carry independent information and the grouping changes
+    nothing. A ratio of 2 means the intervals are twice as wide, and the data
+    hold about as much information as a quarter as many independent days.
+    """
+    prepared = _relative_to_day(daily)
+    independent = smf.ols("relativeToDay ~ beach - 1", data=prepared.to_pandas()).fit()
+    grouped = fit_beach_model(daily)
+    return pl.DataFrame(
+        {
+            "beach": [
+                name.removeprefix("beach[").removesuffix("]")
+                for name in grouped.params.index
+            ],
+            "standardErrorIndependent": independent.bse.to_numpy(),
+            "standardErrorByMonth": grouped.bse.to_numpy(),
+        }
+    ).with_columns(
+        (pl.col("standardErrorByMonth") / pl.col("standardErrorIndependent")).alias(
+            "ratio"
+        )
     )
 
 

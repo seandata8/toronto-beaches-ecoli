@@ -23,8 +23,8 @@ from toronto_beaches_ecoli.analysis import (
     day_to_day_correlation,
     exceedance_by_beach,
     fit_beach_model,
-    overdispersion,
     pairwise_differences,
+    standard_error_inflation,
     warning_agreement,
 )
 
@@ -168,9 +168,9 @@ checks = [
         f"{false_positives} of {common_pairs.height} pairs",
     ),
     (
-        "days over the limit cluster more than Poisson allows",
-        overdispersion(daily) > 1.5,
-        f"variance over mean {overdispersion(daily):.2f}",
+        "grouping days by month widens the standard errors, as the carry-over implies",
+        standard_error_inflation(daily)["ratio"].median() > 1.2,
+        f"median ratio {standard_error_inflation(daily)['ratio'].median():.2f}",
     ),
     (
         "one day predicts the next, as the carry-over implies",

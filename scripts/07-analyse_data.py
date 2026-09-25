@@ -30,8 +30,8 @@ from toronto_beaches_ecoli.analysis import (
     exceedance_by_beach,
     exceedance_by_beach_and_year,
     fit_beach_model,
-    overdispersion,
     pairwise_differences,
+    standard_error_inflation,
     warning_agreement,
 )
 
@@ -46,7 +46,6 @@ daily = daily_geometric_means(analysis_data)
 #### Question 1: do some beaches go over the limit more often? ####
 shares = exceedance_by_beach(daily)
 by_year = exceedance_by_beach_and_year(daily)
-clustering = overdispersion(daily)
 
 model = fit_beach_model(daily)
 coefficients = pl.DataFrame(
@@ -60,6 +59,10 @@ coefficients = pl.DataFrame(
 ).sort("estimate", descending=True)
 
 differences = pairwise_differences(model)
+
+# Whether grouping days by month matters: the same model with every day treated
+# as independent, compared with the grouped fit above.
+inflation = standard_error_inflation(daily)
 
 # The year-by-year spread of each beach's share, which says whether the
 # ranking is a property of the beach or of a few unusual summers.
@@ -153,9 +156,17 @@ print("\nBefore and from 2018, when the reporting ceiling appeared")
 show(halves.with_columns(pl.col("before2018").round(3), pl.col("from2018").round(3)))
 
 print(
-    f"\nDays over the limit per beach per year vary {clustering:.1f} times as much as"
-    "\na Poisson distribution allows, so they cluster rather than arriving steadily."
+    "\nStandard errors when days in the same month are treated as related, against"
+    "\ntreating every day as independent"
 )
+show(
+    inflation.sort("ratio").with_columns(
+        pl.col("standardErrorIndependent").round(4),
+        pl.col("standardErrorByMonth").round(4),
+        pl.col("ratio").round(2),
+    )
+)
+print(f"Median ratio: {inflation['ratio'].median():.2f}")
 
 print("\nModel: how far each beach sits above or below the others sampled the same day")
 print("(log10 scale, so 0.30 means about twice as high)")
@@ -223,6 +234,7 @@ shares.write_csv(RESULTS_DIR / "exceedance-by-beach.csv")
 by_year.write_csv(RESULTS_DIR / "exceedance-by-beach-and-year.csv")
 coefficients.write_csv(RESULTS_DIR / "beach-model-coefficients.csv")
 differences.write_csv(RESULTS_DIR / "beach-pairwise-differences.csv")
+inflation.write_csv(RESULTS_DIR / "beach-model-standard-errors.csv")
 grouping_check.write_csv(RESULTS_DIR / "beach-pairwise-grouping-check.csv")
 agreement.write_csv(RESULTS_DIR / "warning-agreement.csv")
 print(f"\nSaved the tables to {RESULTS_DIR}")
