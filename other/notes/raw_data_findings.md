@@ -33,7 +33,7 @@ Summary of what `other/explore/raw_data_overview.ipynb` found in `data/01-raw_da
 
 ## A reporting ceiling at 1,000, from 2018
 
-Found on 23 September 2026 in the figure of every raw result (`other/explore/figures/all-raw-results.png`), which shows a dense bar sitting exactly on 1,000 in the later years.
+Found on 23 September 2026 in the figure of every raw result (`paper/figures/all-raw-results.png`), which shows a dense bar sitting exactly on 1,000 in the later years.
 
 | Period | Results reported as exactly 1,000 | Results above 1,000 |
 |---|---|---|

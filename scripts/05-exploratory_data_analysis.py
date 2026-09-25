@@ -1,14 +1,17 @@
 #### Preamble ####
-# Purpose: Draws the three figures that show the whole dataset: every published
-# result over time, including the one that cleaning removes; how high the results
-# get at each beach; and every beach-day, which is the unit the analysis uses.
+# Purpose: Draws the four figures that show the whole dataset: a map of the
+# sampling sites; every published result over time, including the one that
+# cleaning removes; how high the results get at each beach; and every beach-day,
+# which is the unit the analysis uses. The figures are saved to `paper/figures/`
+# and the paper reads the saved images.
 # Author: Sean Murphy
 # Date: 23 September 2026
 # Contact: seandata8@gmail.com
 # License: MIT
 # Pre-requisites:
-# - `polars`, `numpy` and `matplotlib` must be installed
+# - `polars`, `numpy`, `matplotlib` and `contextily` must be installed
 # - Run `uv run scripts/02-download_data.py` and `scripts/03-clean_data.py` first
+# - Needs an internet connection: the map's basemap tiles are downloaded
 # - Run from the project root: uv run scripts/05-exploratory_data_analysis.py
 
 
@@ -17,6 +20,7 @@ import math
 from pathlib import Path
 from textwrap import fill
 
+import contextily as cx
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
@@ -25,7 +29,7 @@ from matplotlib.ticker import FixedLocator, FuncFormatter
 
 RAW_DATA_PATH = "data/01-raw_data/raw_data.csv"
 ANALYSIS_DATA_PATH = "data/02-analysis_data/analysis_data.csv"
-FIGURE_DIR = Path("other/explore/figures")
+FIGURE_DIR = Path("paper/figures")
 
 WARNING_THRESHOLD = 100
 DETECTION_LIMIT = 10
@@ -86,6 +90,118 @@ def to_significant_figures(value: float, digits: int = 2) -> float:
         return 0.0
     magnitude = math.floor(math.log10(abs(value)))
     return round(value, -(magnitude - digits + 1))
+
+
+#### Map: where the sampling sites are ####
+# The raw data, so the two sites that cleaning leaves out can be shown: both are
+# listed under beaches 14 to 16 km away.
+DROPPED_SITES = ["60W", "GP6"]
+
+# Label offsets in points (x, y), chosen by hand so names don't overlap
+LABEL_OFFSETS = {
+    "Marie Curtis Park East Beach": (0, -14),
+    "Sunnyside Beach": (0, 12),
+    "Hanlan's Point Beach": (-10, -12),
+    "Gibraltar Point Beach": (0, -24),
+    "Centre Island Beach": (10, -14),
+    "Ward's Island Beach": (14, -6),
+    "Cherry Beach": (0, 12),
+    "Woodbine Beaches": (-10, -14),
+    "Kew Balmy Beach": (10, -12),
+    "Bluffer's Beach Park": (-10, 0),
+}
+
+# One row per site, with longitude and latitude taken from the GeoJSON point
+sites = (
+    pl.read_csv(RAW_DATA_PATH)
+    .with_columns(
+        lon=pl.col("geometry")
+        .str.json_path_match("$.coordinates[0][0]")
+        .cast(pl.Float64),
+        lat=pl.col("geometry")
+        .str.json_path_match("$.coordinates[0][1]")
+        .cast(pl.Float64),
+    )
+    .select("beachName", "siteName", "lon", "lat")
+    .unique()
+    # unique returns rows in no fixed order; sorting fixes the drawing order
+    .sort("beachName", "siteName")
+)
+
+# Web Mercator (EPSG:3857) coordinates in metres, the projection of web map tiles
+EARTH_RADIUS = 6_378_137
+sites = sites.with_columns(
+    x=np.radians(pl.col("lon")) * EARTH_RADIUS,
+    y=(np.pi / 4 + np.radians(pl.col("lat")) / 2).tan().log() * EARTH_RADIUS,
+)
+
+kept_sites = sites.filter(~pl.col("siteName").is_in(DROPPED_SITES))
+dropped_sites = sites.filter(pl.col("siteName").is_in(DROPPED_SITES))
+beach_centres = kept_sites.group_by("beachName").agg(
+    pl.col("x").mean(), pl.col("y").mean()
+)
+
+figure, axis = plt.subplots(figsize=(11, 6))
+axis.scatter(
+    kept_sites["x"],
+    kept_sites["y"],
+    s=40,
+    color=DATA_COLOUR,
+    edgecolor="white",
+    linewidth=1,
+    zorder=3,
+    label="Sampling site",
+)
+axis.scatter(
+    dropped_sites["x"],
+    dropped_sites["y"],
+    s=40,
+    color=ABOVE_THRESHOLD_COLOUR,
+    edgecolor="white",
+    linewidth=1,
+    zorder=3,
+    label="Site far from its listed beach (left out)",
+)
+
+for name, x, y in beach_centres.iter_rows():
+    dx, dy = LABEL_OFFSETS[name]
+    axis.annotate(
+        name,
+        (x, y),
+        xytext=(dx, dy),
+        textcoords="offset points",
+        ha="left" if dx > 0 else "right" if dx < 0 else "center",
+        va="center",
+        fontsize=9,
+        color=TEXT_PRIMARY,
+    )
+for beach, site, x, y in dropped_sites.select(
+    "beachName", "siteName", "x", "y"
+).iter_rows():
+    axis.annotate(
+        f"{site} (listed as {beach})",
+        (x, y),
+        xytext=(0, 12),
+        textcoords="offset points",
+        ha="center",
+        fontsize=8,
+        color=TEXT_SECONDARY,
+    )
+
+MAP_PAD = 2_500
+axis.set_xlim(sites["x"].min() - MAP_PAD, sites["x"].max() + MAP_PAD)
+axis.set_ylim(sites["y"].min() - MAP_PAD, sites["y"].max() + MAP_PAD)
+cx.add_basemap(
+    axis,
+    crs="EPSG:3857",
+    source=cx.providers.Esri.WorldGrayCanvas,
+    attribution_size=6,
+)
+axis.set_axis_off()
+axis.legend(loc="upper left", frameon=True)
+figure.tight_layout()
+FIGURE_DIR.mkdir(parents=True, exist_ok=True)
+figure.savefig(FIGURE_DIR / "sampling-sites-map.png", dpi=300, bbox_inches="tight")
 
 
 #### Graph 0: every raw result, including the one that cleaning removes ####
@@ -217,7 +333,6 @@ figure.text(
     color=TEXT_SECONDARY,
 )
 figure.tight_layout(rect=(0, 0, 1, 0.74))
-FIGURE_DIR.mkdir(parents=True, exist_ok=True)
 figure.savefig(FIGURE_DIR / "all-raw-results.png", bbox_inches="tight")
 
 
@@ -350,6 +465,9 @@ daily_means = (
     .with_columns(
         (pl.col("logGeometricMean") > np.log10(WARNING_THRESHOLD)).alias("overLimit")
     )
+    # group_by returns rows in no fixed order. Sorting makes each day get the same
+    # jitter on every run, so the seeded figure is reproducible.
+    .sort("beachName", "collectionDate")
 )
 
 day_order = (
@@ -464,7 +582,8 @@ axis.set_xlabel("E. coli per 100 mL (log scale)", fontsize=10, color=TEXT_SECOND
 figure.tight_layout(rect=(0, 0, 1, 0.84))
 figure.savefig(FIGURE_DIR / "all-beach-days.png", bbox_inches="tight")
 
-print(f"Saved three figures to {FIGURE_DIR}")
+print(f"Saved four figures to {FIGURE_DIR}")
+print(f"Sampling sites mapped: {sites.height}")
 print(f"Raw results plotted: {rest.height:,}")
 print(f"Cleaned results plotted: {summary_results.height:,}")
 print(f"Beach-days plotted: {daily_means.height:,}")

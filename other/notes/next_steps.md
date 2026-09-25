@@ -11,7 +11,7 @@ Written 24 September 2026, at the end of the session that cleaned the data and r
 | `02-download_data.py` | Raw data from Open Data Toronto |
 | `03-clean_data.py` | 98,370 rows of analysis data |
 | `04-test_analysis_data.py` | 22 pointblank checks on the cleaned data |
-| `05-exploratory_data_analysis.py` | Three figures, written to `other/explore/figures/` |
+| `05-exploratory_data_analysis.py` | Four figures (site map and three data figures), written to `paper/figures/` |
 | `06-validate_on_simulated_data.py` | Runs the analysis where the answer is known; all ten checks pass |
 | `07-analyse_data.py` | The analysis of the real data; tables in `other/results/` |
 
