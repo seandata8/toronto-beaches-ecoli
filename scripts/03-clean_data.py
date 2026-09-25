@@ -28,8 +28,9 @@ OUTPUT_PATH = Path("data/02-analysis_data/analysis_data.csv")
 IMPLAUSIBLE_RESULT = 100_000
 
 # Two sites added in 2026 and listed under beaches 14 to 16 km away. Every other
-# site sits within 0.4 km of the rest of its beach. The City has not answered an
-# email asking about them, so they are left out.
+# site sits within 0.4 km of the rest of its beach. On 25 September 2026 the City
+# said the listing had been referred for correction, without naming the right
+# beach, so they are left out. A later download may list them differently.
 MISLABELLED_SITES = ["60W", "GP6"]
 
 

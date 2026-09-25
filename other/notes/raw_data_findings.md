@@ -13,7 +13,7 @@ Summary of what `other/explore/raw_data_overview.ipynb` found in `data/01-raw_da
 
 - 10 beaches and 52 sites. Each site has one fixed location for its whole record. [Beaches and sites; `siteName` and `geometry`]
 - Most beaches have 5 sites. Kew Balmy has 6. Sunnyside had only 4 (19W–22W) from 2007 to 2025. [Samples per beach per day]
-- Two sites were added on 2026-05-19 and sampled daily after that: `60W` (listed as Sunnyside Beach) and `GP6` (listed as Gibraltar Point Beach). Both are about 14–16 km from the beaches they are listed under, in the east end between Kew Balmy and Bluffer's. All other sites are within 0.4 km of the rest of their beach. They may be mislabelled. An email to SwimSafe@toronto.ca was drafted to ask. [Map of sampling sites]
+- Two sites were added on 2026-05-19 and sampled daily after that: `60W` (listed as Sunnyside Beach) and `GP6` (listed as Gibraltar Point Beach). Both are about 14–16 km from the beaches they are listed under, in the east end between Kew Balmy and Bluffer's. All other sites are within 0.4 km of the rest of their beach. They may be mislabelled. An email to SwimSafe@toronto.ca on 22 September 2026 asked about them. On 25 September 2026 Toronto Public Health staff replied that the listing had been referred to their IT team for correction, expected the following week. The reply did not say whether the beach name, coordinates or site code is wrong. [Map of sampling sites]
 
 ## When sampling happens
 
@@ -96,6 +96,6 @@ Caveats:
 
 - Keep only dates in the season (from about Victoria Day to Labour Day). This removes the early one-off dates and post-season placeholder rows.
 - Drop rows with blank `eColi`.
-- Decide how to handle `60W` and `GP6` (drop or reassign), depending on any reply from the City.
+- Drop `60W` and `GP6`. The City's reply confirmed a listing problem but did not name the right beach.
 - Decide how to treat the value of 6,191,768, and whether results of 10 are treated as "10 or less".
 - Parse `collectionDate` as a date and `geometry` into longitude and latitude columns.

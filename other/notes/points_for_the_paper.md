@@ -47,4 +47,6 @@ The ceiling can also hide a day over the limit, which deserves one to three sent
 
 ## The two mislabelled sites
 
-`60W` and `GP6` appear in 2026 only and sit 14 to 16 km from the beaches they are listed under. They are dropped, and an email to the City went unanswered. One sentence in the cleaning appendix, with the distance, so the decision is checkable.
+`60W` and `GP6` appear in 2026 only and sit 14 to 16 km from the beaches they are listed under. They are dropped. One sentence in the cleaning appendix, with the distance, so the decision is checkable.
+
+Add a footnote (or endnote) on the City's reply: on 25 September 2026 Toronto Public Health staff said the listing had been referred for correction (personal communication). Do not name the staff member. The footnote should also say the paper uses the data as downloaded on 22 September 2026, so a later fix on the portal does not change the results, and a fresh download may list these sites differently.

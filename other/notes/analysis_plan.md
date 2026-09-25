@@ -33,7 +33,7 @@ One framing point that shapes the uncertainty. The ten beaches are the whole pop
 - Late May is cleaner than the rest of the season: 8.6% of its beach-days exceed 100, against 13–16% in June, July and August. Including it lowers every beach's overall share slightly. This affects all beaches alike, so it should not reorder them, but the paper says so. Note also that 2007 and 2008 have no late-May sampling and 2020 started in mid-June; by-season shares handle this, because each season is summarised on its own days.
 - Blank `eColi` rows are removed. They are days when no test was done.
 - The value of 6,191,768 is removed as an error. It is about 60,000 times the warning level.
-- Sites `60W` and `GP6` are left out, pending a reply from the City: they cover only 2026 and are far from their listed beaches.
+- Sites `60W` and `GP6` are left out: they cover only 2026 and are far from their listed beaches. The City confirmed on 25 September 2026 that the listing had been referred for correction, but did not say which beach they belong to.
 
 ## Question 1: comparing beaches
 
@@ -151,4 +151,4 @@ The beach groups are made up. They are not based on the real data.
 ## Open decisions
 
 - Whether to report the floor sensitivity check in the appendix or only mention its outcome in a sentence.
-- `60W` and `GP6`: drop or reassign, depending on the City's reply.
+- `60W` and `GP6`: settled. The City referred the listing for correction without naming the right beach, so they are dropped.

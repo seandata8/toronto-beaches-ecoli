@@ -38,4 +38,4 @@ Findings are in `results_summary.md`, with the method check in `method_validatio
 - `data/00-simulated_data/simulated_data_uncensored.csv` is read only by `06-validate_on_simulated_data.py`. It is committed so the censoring check is reproducible.
 - A sketches folder is expected in the repo and does not exist yet.
 - The README still describes the starter template rather than this project.
-- No reply from the City about sites `60W` and `GP6`. They are dropped, which is recorded in the cleaning script and in `raw_data_findings.md`.
+- The City replied on 25 September 2026 about sites `60W` and `GP6`: Toronto Public Health staff referred the listing to their IT team for correction, expected the following week, without saying which field is wrong. The sites stay dropped, as recorded in the cleaning script and in `raw_data_findings.md`. The saved raw data is unaffected by any later fix.
