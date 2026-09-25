@@ -14,7 +14,7 @@ All ten checks pass. In plain terms:
 - The model recovers the built-in gaps almost exactly once the laboratory's reporting is taken away: 0.399 against a true 0.400, and 0.208 against a true 0.200.
 - Every one of the 12 comparisons between a high beach and a level one is found.
 - **None** of the 15 comparisons between beaches built at the same level is wrongly called a difference, so Holm's correction is not firing too often.
-- Days over the limit vary 4.7 times as much across seasons as a Poisson distribution allows, the clustering the plan predicted.
+- Days over the limit vary 4.7 times as much across years as a Poisson distribution allows, the clustering the plan predicted.
 - Consecutive days correlate at 0.394, and the correlation falls to 0.368 when pairs with both days at the reporting floor are dropped, as predicted.
 
 ## The finding the paper has to report: censoring shrinks the gaps

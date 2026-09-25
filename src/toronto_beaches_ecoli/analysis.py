@@ -59,7 +59,7 @@ def exceedance_by_beach(daily: pl.DataFrame) -> pl.DataFrame:
 
 
 def exceedance_by_beach_and_year(daily: pl.DataFrame) -> pl.DataFrame:
-    """The same share, season by season."""
+    """The same share, year by year."""
     return (
         daily.group_by("beachName", "year")
         .agg(
@@ -72,16 +72,16 @@ def exceedance_by_beach_and_year(daily: pl.DataFrame) -> pl.DataFrame:
 
 
 def overdispersion(daily: pl.DataFrame) -> float:
-    """Variance over mean of the days above the limit, per beach per season.
+    """Variance over mean of the days above the limit, per beach per year.
 
     A Poisson distribution has variance equal to its mean, so a ratio near 1
     would mean days over the limit arrive independently at a steady rate. A
     larger ratio means they cluster, which is what a wet week does.
     """
-    per_season = daily.group_by("beachName", "year").agg(
+    per_year = daily.group_by("beachName", "year").agg(
         pl.col("overLimit").sum().alias("daysOverLimit")
     )
-    return per_season["daysOverLimit"].var() / per_season["daysOverLimit"].mean()
+    return per_year["daysOverLimit"].var() / per_year["daysOverLimit"].mean()
 
 
 def fit_beach_model(daily: pl.DataFrame):

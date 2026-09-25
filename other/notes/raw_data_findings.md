@@ -67,7 +67,7 @@ Checked on 25 September 2026 using `data/02-analysis_data/analysis_data.csv`. A 
 - The closest cases are Centre Island 2024-08-12 (about 1,130 needed), Centre Island 2025-08-22 (about 1,230), Marie Curtis 2023-08-25 (about 1,490), and Bluffer's 2020-06-15 and 2020-06-16 and Centre Island 2022-07-29 (about 1,670 each).
 - Centre Island has 13 of the 34 days, Sunnyside and Kew Balmy 5 each, Bluffer's 4, Woodbine and Marie Curtis 3 each, and Hanlan's Point 1.
 
-So the ceiling could have hidden a warning on a handful of days, roughly 8 to 18 over nine seasons, if the true reading was a few thousand. This changes the earlier point that counting days above 100 is unaffected: that holds for single samples, but not for the geomean-based warning.
+So the ceiling could have hidden a warning on a handful of days, roughly 8 to 18 over nine years, if the true reading was a few thousand. This changes the earlier point that counting days above 100 is unaffected: that holds for single samples, but not for the geomean-based warning.
 
 Caveats:
 

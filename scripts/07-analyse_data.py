@@ -61,13 +61,13 @@ coefficients = pl.DataFrame(
 
 differences = pairwise_differences(model)
 
-# The season-by-season spread of each beach's share, which says whether the
+# The year-by-year spread of each beach's share, which says whether the
 # ranking is a property of the beach or of a few unusual summers.
-season_spread = (
+year_spread = (
     by_year.group_by("beachName")
     .agg(
-        pl.col("share").min().alias("lowestSeason"),
-        pl.col("share").max().alias("highestSeason"),
+        pl.col("share").min().alias("lowestYear"),
+        pl.col("share").max().alias("highestYear"),
     )
     .join(shares.select("beachName", "share"), on="beachName")
     .sort("share", descending=True)
@@ -140,12 +140,12 @@ print(f"Beach-days analysed: {daily.height:,}\n")
 print("Question 1: share of sampled days over 100 E. coli per 100 mL")
 show(shares.with_columns(pl.col("share").round(3)))
 
-print("\nLowest and highest season for each beach")
+print("\nLowest and highest year for each beach")
 show(
-    season_spread.with_columns(
+    year_spread.with_columns(
         pl.col("share").round(3),
-        pl.col("lowestSeason").round(3),
-        pl.col("highestSeason").round(3),
+        pl.col("lowestYear").round(3),
+        pl.col("highestYear").round(3),
     )
 )
 
@@ -153,7 +153,7 @@ print("\nBefore and from 2018, when the reporting ceiling appeared")
 show(halves.with_columns(pl.col("before2018").round(3), pl.col("from2018").round(3)))
 
 print(
-    f"\nDays over the limit per beach per season vary {clustering:.1f} times as much as"
+    f"\nDays over the limit per beach per year vary {clustering:.1f} times as much as"
     "\na Poisson distribution allows, so they cluster rather than arriving steadily."
 )
 

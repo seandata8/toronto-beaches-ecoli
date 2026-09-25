@@ -115,6 +115,6 @@ print(
     f"  {'outside the season':<20} {raw_data.height - analysis_data.height - sum(removed.values()):>7,}"
 )
 
-print(f"\nSeasons: {analysis_data['year'].min()} to {analysis_data['year'].max()}")
+print(f"\nYears: {analysis_data['year'].min()} to {analysis_data['year'].max()}")
 print(f"Beaches: {analysis_data['beachName'].n_unique()}")
 print(f"Sites: {analysis_data['siteName'].n_unique()}")

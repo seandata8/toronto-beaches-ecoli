@@ -43,7 +43,7 @@ EXPECTED_SITES_PER_BEACH = {
     "Bluffer's Beach Park": 5,
 }
 EXPECTED_BEACHES = list(EXPECTED_SITES_PER_BEACH)
-EXPECTED_SEASONS = list(range(2007, 2027))
+EXPECTED_YEARS = list(range(2007, 2027))
 
 DETECTION_LIMIT = 10
 REPORTING_STEP = 10
@@ -81,7 +81,7 @@ def labour_day(year: int) -> date:
 
 season_days = [
     victoria_day(year) + timedelta(days=offset)
-    for year in EXPECTED_SEASONS
+    for year in EXPECTED_YEARS
     for offset in range((labour_day(year) - victoria_day(year)).days + 1)
 ]
 expected_rows = len(season_days) * sum(EXPECTED_SITES_PER_BEACH.values())
@@ -160,10 +160,10 @@ consecutive_days = daily_means.with_columns(
     pl.col("collectionDate").shift(1).over("beachName").alias("previousDate"),
 ).filter((pl.col("collectionDate") - pl.col("previousDate")).dt.total_days() == 1)
 
-# Exceedance days per beach per season, for the comparison with Poisson.
-per_season = (
-    daily_means.with_columns(pl.col("collectionDate").dt.year().alias("season"))
-    .group_by("beachName", "season")
+# Exceedance days per beach per year, for the comparison with Poisson.
+per_year = (
+    daily_means.with_columns(pl.col("collectionDate").dt.year().alias("year"))
+    .group_by("beachName", "year")
     .agg(pl.col("exceeds").sum().alias("exceedanceDays"))
 )
 
@@ -187,7 +187,7 @@ sites_per_beach = (
     simulated_data.group_by("beachName")
     .agg(
         pl.col("siteName").n_unique().alias("nSites"),
-        pl.col("collectionDate").dt.year().n_unique().alias("nSeasons"),
+        pl.col("collectionDate").dt.year().n_unique().alias("nYears"),
     )
     .with_columns(
         pl.col("beachName")
@@ -201,12 +201,12 @@ blanks_in_empty_beach_days = beach_days.filter(pl.col("nResults") == 0)["nSites"
 
 # The ceiling applies only from 2018, and completely from 2026, so the record is
 # split to check that each period behaves as designed.
-season = pl.col("collectionDate").dt.year()
-before_ceiling = results.filter(season < CEILING_FIRST_YEAR)
+sample_year = pl.col("collectionDate").dt.year()
+before_ceiling = results.filter(sample_year < CEILING_FIRST_YEAR)
 after_ceiling = results.filter(
-    (season >= CEILING_FIRST_YEAR) & (season < CEILING_COMPLETE_YEAR)
+    (sample_year >= CEILING_FIRST_YEAR) & (sample_year < CEILING_COMPLETE_YEAR)
 )
-fully_capped = results.filter(season >= CEILING_COMPLETE_YEAR)
+fully_capped = results.filter(sample_year >= CEILING_COMPLETE_YEAR)
 
 design = pl.DataFrame(
     {
@@ -229,7 +229,7 @@ design = pl.DataFrame(
             blanks_in_empty_beach_days / blank_rows,
             (beach_days["nResults"] >= MINIMUM_RESULTS).mean(),
             consecutive_days.select(pl.corr("logGeometricMean", "previousMean")).item(),
-            per_season["exceedanceDays"].var() / per_season["exceedanceDays"].mean(),
+            per_year["exceedanceDays"].var() / per_year["exceedanceDays"].mean(),
             mean_exceedance(HIGH_BEACHES) - mean_exceedance(COMMON_BEACHES),
             # Before 2018 nothing is capped, so high readings must survive.
             (before_ceiling["eColi"] > CEILING_VALUE).mean(),
@@ -256,15 +256,15 @@ built_in = (
     .interrogate()
 )
 
-# Site counts and season coverage, checked beach by beach.
+# Site counts and year coverage, checked beach by beach.
 coverage = (
     pb.Validate(
         data=sites_per_beach,
         tbl_name="Simulated beach data",
-        label="Sites and seasons per beach",
+        label="Sites and years per beach",
     )
     .col_vals_expr(expr=pl.col("nSites") == pl.col("expectedSites"))
-    .col_vals_eq(columns="nSeasons", value=len(EXPECTED_SEASONS))
+    .col_vals_eq(columns="nYears", value=len(EXPECTED_YEARS))
     .interrogate()
 )
 

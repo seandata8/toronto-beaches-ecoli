@@ -42,7 +42,7 @@ EXPECTED_SITES_PER_BEACH = {
     "Bluffer's Beach Park": 5,
 }
 EXPECTED_BEACHES = list(EXPECTED_SITES_PER_BEACH)
-EXPECTED_SEASONS = list(range(2007, 2027))
+EXPECTED_YEARS = list(range(2007, 2027))
 
 DETECTION_LIMIT = 10
 REPORTING_STEP = 10
@@ -74,7 +74,7 @@ def labour_day(year: int) -> date:
 
 season_days = [
     victoria_day(year) + timedelta(days=offset)
-    for year in EXPECTED_SEASONS
+    for year in EXPECTED_YEARS
     for offset in range((labour_day(year) - victoria_day(year)).days + 1)
 ]
 
@@ -104,7 +104,7 @@ structure = (
     .col_vals_not_null(columns=analysis_data.columns)
     .col_vals_in_set(columns="beachName", set=EXPECTED_BEACHES)
     .col_vals_not_in_set(columns="siteName", set=REMOVED_SITES)
-    .col_vals_in_set(columns="year", set=EXPECTED_SEASONS)
+    .col_vals_in_set(columns="year", set=EXPECTED_YEARS)
     # Every date falls within its own season, Victoria Day to Labour Day.
     .col_vals_expr(expr=pl.col("collectionDate").is_in(season_days))
     .col_vals_expr(expr=pl.col("collectionDate").dt.year() == pl.col("year"))
@@ -133,7 +133,7 @@ per_beach = (
     .agg(
         pl.col("siteName").n_unique().alias("nSites"),
         pl.col("beachId").n_unique().alias("nIds"),
-        pl.col("year").n_unique().alias("nSeasons"),
+        pl.col("year").n_unique().alias("nYears"),
     )
     .with_columns(
         pl.col("beachName")
@@ -154,11 +154,11 @@ coverage = (
     pb.Validate(
         data=per_beach,
         tbl_name="Cleaned beach data",
-        label="Sites and seasons per beach",
+        label="Sites and years per beach",
     )
     .col_vals_expr(expr=pl.col("nSites") == pl.col("expectedSites"))
     .col_vals_eq(columns="nIds", value=1)
-    .col_vals_eq(columns="nSeasons", value=len(EXPECTED_SEASONS))
+    .col_vals_eq(columns="nYears", value=len(EXPECTED_YEARS))
     .interrogate()
 )
 
@@ -212,7 +212,7 @@ reporting = pl.DataFrame(
             (after_ceiling["eColi"] > CEILING_VALUE).mean(),
             (fully_capped["eColi"] > CEILING_VALUE).mean(),
         ],
-        # Bounds are wide enough to survive another season of data, and tight
+        # Bounds are wide enough to survive another year of data, and tight
         # enough to catch a change in how the City reports.
         "lower": [0.40, 0.0, 0.99, 0.95, 0.005, 0.005, 0.0005, 0.0],
         "upper": [0.55, 0.005, 1.00, 1.00, 0.030, 0.030, 0.0200, 0.0],

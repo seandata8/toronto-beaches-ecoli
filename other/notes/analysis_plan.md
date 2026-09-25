@@ -12,7 +12,7 @@ Written 22 September 2026, revised 23 September 2026, before any comparison of b
 
 Both questions are answered by description, not by statistical tests.
 
-The dataset covers every Toronto beach across twenty seasons, so "which beaches exceeded the threshold most often?" and "how often did yesterday's result give the wrong advice about today?" are questions of arithmetic on a complete record. No assumptions are needed and no model is fitted. These descriptive answers are the findings of the paper and belong in the main text with the graphs.
+The dataset covers every Toronto beach across twenty years, so "which beaches exceeded the threshold most often?" and "how often did yesterday's result give the wrong advice about today?" are questions of arithmetic on a complete record. No assumptions are needed and no model is fitted. These descriptive answers are the findings of the paper and belong in the main text with the graphs.
 
 Testing answers a different question: whether a gap between two beaches reflects a durable difference rather than the particular weather these twenty summers happened to bring. That is what the model section does, and it is reported after the descriptive results rather than in place of them.
 
@@ -29,7 +29,7 @@ One framing point that shapes the uncertainty. The ten beaches are the whole pop
 
 ## Data to analyse
 
-- **Seasons run from Victoria Day to Labour Day, 2007–2026.** Dates outside this window are removed. Checked against the data on 23 September 2026: from 2012 onward sampling starts the day after Victoria Day in 11 of 15 years, and the median start across all 20 years is Victoria Day plus one day, against 8.5 days before 1 June. Sampling begins the Tuesday after the holiday Monday. Cutting at 1 June instead would drop 7,284 results, about 7% of the record, including 8–13 sampling days a year at nearly every beach since 2012.
+- **Each year's sampling runs from Victoria Day to Labour Day, 2007–2026.** Dates outside this window are removed. Checked against the data on 23 September 2026: from 2012 onward sampling starts the day after Victoria Day in 11 of 15 years, and the median start across all 20 years is Victoria Day plus one day, against 8.5 days before 1 June. Sampling begins the Tuesday after the holiday Monday. Cutting at 1 June instead would drop 7,284 results, about 7% of the record, including 8–13 sampling days a year at nearly every beach since 2012.
 - Late May is cleaner than the rest of the season: 8.6% of its beach-days exceed 100, against 13–16% in June, July and August. Including it lowers every beach's overall share slightly. This affects all beaches alike, so it should not reorder them, but the paper says so. Note also that 2007 and 2008 have no late-May sampling and 2020 started in mid-June; by-season shares handle this, because each season is summarised on its own days.
 - Blank `eColi` rows are removed. They are days when no test was done.
 - The value of 6,191,768 is removed as an error. It is about 60,000 times the warning level.
@@ -37,9 +37,9 @@ One framing point that shapes the uncertainty. The ten beaches are the whole pop
 
 ## Question 1: comparing beaches
 
-**Main result (descriptive).** For each beach, the share of sampled days that exceeded the threshold, over the whole record and by season. Shares are used rather than counts because beaches and seasons differ in how many days were sampled. This is reported alongside a graph of every beach-day, so the reader sees the actual observations and not only the summary.
+**Main result (descriptive).** For each beach, the share of sampled days that exceeded the threshold, over the whole record and by year. Shares are used rather than counts because beaches and years differ in how many days were sampled. This is reported alongside a graph of every beach-day, so the reader sees the actual observations and not only the summary.
 
-**Why rain is not a confounder.** A confounder would make one beach look worse than another when it is not. Rain falls on all the beaches on the same days, and over twenty seasons each beach experiences much the same weather, so it cannot manufacture a ranking. If beaches near river mouths respond more strongly to rain, that responsiveness is part of what makes them worse, not a distortion. Shared weather affects the uncertainty around the shares, not the shares themselves.
+**Why rain is not a confounder.** A confounder would make one beach look worse than another when it is not. Rain falls on all the beaches on the same days, and over twenty years each beach experiences much the same weather, so it cannot manufacture a ranking. If beaches near river mouths respond more strongly to rain, that responsiveness is part of what makes them worse, not a distortion. Shared weather affects the uncertainty around the shares, not the shares themselves.
 
 **Why the counts are not Poisson.** Warning days are a count out of a known number of sampled days, so each sampled day is a yes/no trial and the natural description is binomial. Poisson approximates the binomial only when the probability is small, which fails for the frequently posted beaches that matter most here. Both distributions also assume days are independent at a constant rate, whereas a wet week posts a beach for several days running. The result is more variation across seasons than either distribution predicts, so fitted standard errors would be too small. Check this directly: count exceedance days per beach per season and compare the variance across seasons with the mean. Roughly equal supports Poisson; a variance several times the mean confirms the clustering.
 
@@ -57,10 +57,10 @@ with date as a factor, one level per sampling day. A date factor subtracts each 
 
 Three complications, each with a handling:
 
-- **Days are not independent.** Levels carry over from one day to the next, so the standard errors the model reports are too small. Cluster by month-year, or block-bootstrap whole seasons, or thin to one day per week and check whether the conclusion survives.
+- **Days are not independent.** Levels carry over from one day to the next, so the standard errors the model reports are too small. Cluster by month-year, or block-bootstrap whole years, or thin to one day per week and check whether the conclusion survives.
 - **Forty-five pairs.** With ten beaches, correct the pairwise contrasts for multiple comparisons using Holm or Tukey.
 - **The floor.** The outcome is censored from below: 22% of beach-days have every sample at the detection limit, so their geometric mean is exactly 10 whatever the true level was. This is uneven across beaches, from 3.8% of days at Sunnyside to 33% at Hanlan's Point, so it shrinks the apparent gaps between the cleanest beaches most. Refit on days where at least one of the two beaches is above the floor, and report the censoring share per beach beside the coefficients so the reader can see where the estimate is weakest.
-- **The ceiling.** From 2018 the outcome is also censored from above at 1,000, which pulls the high beaches down rather than the clean ones up, and does so only in the later seasons. It covers 1–2% of results, so the effect is smaller than the floor's, but it runs against the paper's finding: it understates how far the worst beaches sit above the rest. Fit the model on the seasons before 2018 and from 2018 onward separately, and report whether the beach coefficients move. A difference would show the ceiling is doing work, and the direction is known in advance.
+- **The ceiling.** From 2018 the outcome is also censored from above at 1,000, which pulls the high beaches down rather than the clean ones up, and does so only in the later years. It covers 1–2% of results, so the effect is smaller than the floor's, but it runs against the paper's finding: it understates how far the worst beaches sit above the rest. Fit the model on the seasons before 2018 and from 2018 onward separately, and report whether the beach coefficients move. A difference would show the ceiling is doing work, and the direction is known in advance.
 
 **Site counts differ between beaches.** Sunnyside has 4 sites, Kew Balmy 6, the rest 5. A mean of 4 samples is noisier than one of 6, and because exceedance means crossing a fixed threshold, extra noise pushes more days over 100 even when the true level is identical. Sunnyside is therefore mildly favoured to look worse and Kew Balmy to look better, from site counts alone. The size of this effect is measured on the simulated data, where the site counts differ but the baselines do not, and the measured size is reported with the descriptive shares.
 
@@ -84,7 +84,7 @@ Three complications, each with a handling:
 
 Recompute the headline numbers with floor values set to 5 rather than 10, the common convention of substituting half the detection limit, and state whether the conclusions change.
 
-Do the same at the top: recompute with the seasons from 2018 onward left out, which is the period the 1,000 ceiling covers. If the ranking of the beaches holds in both halves of the record, neither form of censoring is driving the result.
+Do the same at the top: recompute with the years from 2018 onward left out, which is the period the 1,000 ceiling covers. If the ranking of the beaches holds in both halves of the record, neither form of censoring is driving the result.
 
 One paragraph in an appendix, covering both.
 
@@ -122,7 +122,7 @@ The starting values put too little spread on a single sample, which left only ab
 
 Site noise was raised again on 23 September 2026, from 0.50 to 0.60, once the ceiling was added. At 0.50 the simulated upper tail was too thin for a ceiling to bite: only 0.6% of results passed 1,000 where the real data has 1.1% before 2018. At 0.60 the tail matches, and the floor share barely moves. One mismatch remains: 0.7% of simulated results from 2018 to 2025 sit at the ceiling against 1.5% in the real data, because Toronto appears to cap some readings that would have fallen below 1,000. The direction of the bias is the same, so the simulation understates its size rather than misstating its nature.
 
-**Carry-over across seasons:** the carry-over runs within a season only. Each season starts with a fresh draw, because there is no water quality record over the winter to carry.
+**Carry-over across years:** the carry-over runs within a year only. Each year starts with a fresh draw, because there is no water quality record over the winter to carry.
 
 The beach groups are made up. They are not based on the real data.
 
@@ -132,7 +132,7 @@ The beach groups are made up. They are not based on the real data.
 - The pairwise contrasts separate the high beaches from the common ones and do not separate the six common beaches from each other, apart from occasional false positives.
 - Over several seeds, pairs of the six common beaches are called different about 5% of the time. A much higher rate means the built-in day-to-day carry-over is breaking the assumption that days are independent, and the clustering or block-bootstrap fix applies to the real data too.
 - The beaches with 4 and 6 sites have the same baseline as the other common beaches, so any difference in their exceedance shares measures the site-count effect alone. That measured size is what the real data's Sunnyside and Kew Balmy shares are read against.
-- Exceedance days per beach per season vary more than a Poisson distribution predicts, and the excess grows as the carry-over fraction is raised. Since the simulation knows the true carry-over, this calibrates how much of the real data's excess variation is explained by day-to-day persistence.
+- Exceedance days per beach per year vary more than a Poisson distribution predicts, and the excess grows as the carry-over fraction is raised. Since the simulation knows the true carry-over, this calibrates how much of the real data's excess variation is explained by day-to-day persistence.
 - The day-to-day correlation matches what the carry-over settings imply, and the correlation computed only on uncensored pairs is lower than the one computed on all pairs.
 
 ## Tests
