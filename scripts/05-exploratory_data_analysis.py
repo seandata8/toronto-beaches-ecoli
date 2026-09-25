@@ -3,7 +3,8 @@
 # sampling sites; every published result over time, including the one that
 # cleaning removes; how high the results get at each beach; and every beach-day,
 # which is the unit the analysis uses. The figures are saved to `paper/figures/`
-# and the paper reads the saved images.
+# and the paper reads the saved images. Titles and captions are in the paper, not
+# the images; the numbers the captions quote are printed at the end.
 # Author: Sean Murphy
 # Date: 23 September 2026
 # Contact: seandata8@gmail.com
@@ -42,9 +43,6 @@ MINIMUM_RESULTS = 4
 # grid and pile up. Spreading them sideways by a few days makes the pile-ups
 # countable; the y position, which carries the measurement, is never moved.
 RAW_JITTER_DAYS = 60
-
-# Characters per caption line, set so that a caption fits the figure width.
-CAPTION_WIDTH = 118
 
 rng = np.random.default_rng(853)
 
@@ -303,36 +301,7 @@ axis.grid(axis="y", color=GRID_COLOUR, linewidth=0.5)
 axis.set_axisbelow(True)
 axis.set_ylabel("E. coli per 100 mL (log scale)", fontsize=10, color=TEXT_SECONDARY)
 
-figure.text(
-    0.008,
-    1.0,
-    "Every result the City has published, 2007 to 2026",
-    ha="left",
-    va="top",
-    fontsize=13,
-    color=TEXT_PRIMARY,
-)
-figure.text(
-    0.008,
-    0.955,
-    fill(
-        f"One point is one water sample ({raw_results.height:,} in total), before any cleaning."
-        " Points are spread sideways within each year so that they can be better visualized;"
-        " the E. coli count itself is never moved. The majority of the results are reported in"
-        " multiples of 10, which is why the low readings fall into separate rows. The laboratory"
-        " reports no results as zero and it was assumed that 'no colonies detected' is reported"
-        " at 10. From 2018 onward, many values are reported as 1,000 and these were assumed to be"
-        " measurements that were >=1000. The dashed line marks 100 per 100 mL, the level at which"
-        " the City posts a swimming warning. The ringed point is the only reading the analysis"
-        " removes.",
-        width=CAPTION_WIDTH,
-    ),
-    ha="left",
-    va="top",
-    fontsize=9.5,
-    color=TEXT_SECONDARY,
-)
-figure.tight_layout(rect=(0, 0, 1, 0.74))
+figure.tight_layout()
 figure.savefig(FIGURE_DIR / "all-raw-results.png", bbox_inches="tight")
 
 
@@ -415,39 +384,9 @@ for axis, beach in zip(axes.flat, summary_order):
     # The threshold falls on the edge between the second and third band.
     axis.axvline(1.5, color=TEXT_PRIMARY, linewidth=1, linestyle=(0, (6, 4)), zorder=3)
 
-figure.text(
-    0.008,
-    1.0,
-    "How high the results get, by beach",
-    ha="left",
-    va="top",
-    fontsize=13,
-    color=TEXT_PRIMARY,
-)
-figure.text(
-    0.008,
-    0.955,
-    fill(
-        f"Every result the analysis uses ({summary_results.height:,}), with each bar labelled by"
-        " its share of that beach's results. Cleaning leaves out the reading of 6,191,768 removed"
-        " as an error, two sites added in 2026 that sit far from the beaches they are listed"
-        " under, and dates outside the sampling season."
-        " The orange bars, right of the dashed line, are the results above 100"
-        " E. coli per 100 mL, the limit the City of Toronto sets for safe swimming. Panels run"
-        " from the beach with the largest share above that limit to the smallest. Each bar counts"
-        " single samples rather than days: a beach is judged on the average of its five or six"
-        " samples, and by that measure Marie Curtis Park East Beach was over the limit on 658 of"
-        " its 1,927 sampled days, or 34%, against the 36% of its samples shown here.",
-        width=CAPTION_WIDTH,
-    ),
-    ha="left",
-    va="top",
-    fontsize=9.5,
-    color=TEXT_SECONDARY,
-)
 figure.supylabel("Number of results", fontsize=10, color=TEXT_SECONDARY)
 figure.supxlabel("E. coli per 100 mL", fontsize=10, color=TEXT_SECONDARY)
-figure.tight_layout(rect=(0.004, 0, 1, 0.78))
+figure.tight_layout()
 figure.savefig(FIGURE_DIR / "results-by-magnitude.png", bbox_inches="tight")
 
 
@@ -527,8 +466,8 @@ axis.tick_params(axis="x", which="minor", labelsize=7.5)
 
 # The 17 days whose geometric mean falls below the reporting floor stretch the
 # axis down to about 2 and squeeze everything else into the right two thirds. The
-# axis starts just under the floor instead, and the caption says how many days
-# that leaves out.
+# axis starts just under the floor instead, and the caption in the paper says
+# how many days that leaves out.
 below_floor = daily_means.filter(
     pl.col("logGeometricMean") < np.log10(DETECTION_LIMIT)
 ).height
@@ -549,41 +488,13 @@ axis.text(
     color=TEXT_SECONDARY,
 )
 
-figure.text(
-    0.008,
-    1.0,
-    "Every beach-day, by beach",
-    ha="left",
-    va="top",
-    fontsize=13,
-    color=TEXT_PRIMARY,
-)
-figure.text(
-    0.008,
-    0.955,
-    fill(
-        "One point is the geometric mean of a beach's samples on one day, the figure the City's"
-        f" limit applies to ({daily_means.height:,} days in total). Days with fewer than four"
-        " results are left out. Points are spread vertically so that they can be counted; the"
-        " value itself is never moved. Orange points, right of the dashed line, are the days"
-        " above 100 E. coli per 100 mL. Half of all samples are reported at 10, the lowest the"
-        " laboratory measures, so the column at 10 is the days on which every sample was at that"
-        " floor, and the stripes just above it are the values a geometric mean of four to six"
-        f" multiples of ten can take. The {below_floor} days whose mean falls below 10 are off"
-        " the left of the axis.",
-        width=CAPTION_WIDTH,
-    ),
-    ha="left",
-    va="top",
-    fontsize=9.5,
-    color=TEXT_SECONDARY,
-)
 axis.set_xlabel("E. coli per 100 mL (log scale)", fontsize=10, color=TEXT_SECONDARY)
-figure.tight_layout(rect=(0, 0, 1, 0.84))
+figure.tight_layout()
 figure.savefig(FIGURE_DIR / "all-beach-days.png", bbox_inches="tight")
 
 print(f"Saved four figures to {FIGURE_DIR}")
 print(f"Sampling sites mapped: {sites.height}")
-print(f"Raw results plotted: {rest.height:,}")
+print(f"Raw results plotted: {raw_results.height:,}")
 print(f"Cleaned results plotted: {summary_results.height:,}")
 print(f"Beach-days plotted: {daily_means.height:,}")
+print(f"Beach-days with a mean below {DETECTION_LIMIT}, off the axis: {below_floor}")

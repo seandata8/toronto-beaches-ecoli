@@ -58,44 +58,21 @@ Add graphs, tables and text. Use sub-sub-headings for each outcome variable or u
 
 
 
-Some of our data is of penguins (@fig-bills), from @palmerpenguins.
+@fig-sites-map shows...
 
-```{r}
-#| label: fig-bills
-#| fig-cap: Bills of penguins
-#| echo: false
+![Each of Toronto's ten swimming beaches is sampled at four to six sites along the shore. Blue points are the 50 sites this paper uses. The two orange points, sites 60W and GP6, were added in 2026 and sit 14 to 16 km from the beaches they are listed under, so they are left out. Map tiles from Esri.](figures/sampling-sites-map.png){#fig-sites-map}
 
-ggplot(penguins, aes(x = island, fill = species)) +
-  geom_bar(alpha = 0.8) +
-  scale_fill_manual(values = c("darkorange","purple","cyan4"),
-                    guide = "none") +
-  theme_minimal() +
-  facet_wrap(~species, ncol = 1) +
-  coord_flip()
-```
+@fig-raw-results shows...
 
-Talk more about it.
+![Every result the City has published, 2007 to 2026. One point is one water sample (98,991 in total), before any cleaning. Points are spread sideways within each year so that they can be seen; the E. coli count itself is never moved. Most results are reported in multiples of 10, which is why the low readings fall into separate rows. The laboratory reports no results as zero, and "no colonies detected" is assumed to be reported as 10. From 2018 on, many results are reported as exactly 1,000, and these are assumed to be readings of 1,000 or more. The dashed line marks 100 E. coli per 100 mL, the level at which the City posts a swimming warning. The ringed point is the only reading the analysis removes.](figures/all-raw-results.png){#fig-raw-results}
 
-And also planes (@fig-planes). (You can change the height and width, but don't worry about doing that until you have finished every other aspect of the paper - Quarto will try to make it look nice and the defaults usually work well once you have enough text.)
+@fig-results-by-magnitude shows...
 
-```{r}
-#| label: fig-planes
-#| fig-cap: Relationship between wing length and width
-#| echo: false
-#| warning: false
-#| message: false
+![How high the results get, by beach. Every result the analysis uses (98,370), with each bar labelled by its share of that beach's results. Cleaning leaves out the reading of 6,191,768 removed as an error, two sites added in 2026 that sit far from the beaches they are listed under, and dates outside the sampling season. The orange bars, right of the dashed line, are the results above 100 E. coli per 100 mL, the limit the City of Toronto sets for safe swimming. Panels run from the beach with the largest share above that limit to the smallest. Each bar counts single samples rather than days: a beach is judged on the geometric mean of its four to six samples, and by that measure Marie Curtis Park East Beach was over the limit on 657 of its 1,925 sampled days (34%), against 35% of its samples.](figures/results-by-magnitude.png){#fig-results-by-magnitude}
 
-analysis_data <- read_csv(here::here("data/02-analysis_data/analysis_data.csv"))
+@fig-beach-days shows...
 
-analysis_data |> 
-  ggplot(aes(x = width, y = length)) +
-  geom_point(alpha = 0.8) +
-  theme_minimal() +
-  labs(x = "Wing width (mm)",
-       y = "Wing length (mm)")
-```
-
-Talk way more about it. 
+![Every beach-day, by beach. One point is the geometric mean of a beach's samples on one day, the figure the City's limit applies to (19,662 days in total). Days with fewer than four results are left out. Points are spread vertically so that they can be counted; the value itself is never moved. Orange points, right of the dashed line, are the days above 100 E. coli per 100 mL. Half of all samples are reported at 10, the lowest the laboratory measures, so the column at 10 is the days on which every sample was at that floor, and the stripes just above it are the values a geometric mean of four to six multiples of ten can take. The 17 days whose mean falls below 10 are off the left of the axis.](figures/all-beach-days.png){#fig-beach-days}
 
 ## Predictor variables
 
