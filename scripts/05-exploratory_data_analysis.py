@@ -94,10 +94,12 @@ def to_significant_figures(value: float, digits: int = 2) -> float:
 # The raw data, so the two sites that cleaning leaves out can be shown: both are
 # listed under beaches 14 to 16 km away.
 DROPPED_SITES = ["60W", "GP6"]
+# Offsets in points and horizontal alignment for their labels, set above each dot
+DROPPED_LABEL_PLACES = {"60W": ((0, 10), "center"), "GP6": ((8, 10), "right")}
 
 # Label offsets in points (x, y), chosen by hand so names don't overlap
 LABEL_OFFSETS = {
-    "Marie Curtis Park East Beach": (0, -14),
+    "Marie Curtis Park East Beach": (12, 0),
     "Sunnyside Beach": (0, 12),
     "Hanlan's Point Beach": (-10, -12),
     "Gibraltar Point Beach": (0, -24),
@@ -108,6 +110,8 @@ LABEL_OFFSETS = {
     "Kew Balmy Beach": (10, -12),
     "Bluffer's Beach Park": (-10, 0),
 }
+# Long names split over two lines so they stay inside the map
+LABEL_TEXT = {"Marie Curtis Park East Beach": "Marie Curtis Park\nEast Beach"}
 
 # One row per site, with longitude and latitude taken from the GeoJSON point
 sites = (
@@ -143,20 +147,20 @@ figure, axis = plt.subplots(figsize=(11, 6))
 axis.scatter(
     kept_sites["x"],
     kept_sites["y"],
-    s=40,
+    s=80,
     color=DATA_COLOUR,
     edgecolor="white",
-    linewidth=1,
+    linewidth=1.5,
     zorder=3,
     label="Sampling site",
 )
 axis.scatter(
     dropped_sites["x"],
     dropped_sites["y"],
-    s=40,
+    s=80,
     color=ABOVE_THRESHOLD_COLOUR,
     edgecolor="white",
-    linewidth=1,
+    linewidth=1.5,
     zorder=3,
     label="Site far from its listed beach (left out)",
 )
@@ -164,25 +168,27 @@ axis.scatter(
 for name, x, y in beach_centres.iter_rows():
     dx, dy = LABEL_OFFSETS[name]
     axis.annotate(
-        name,
+        LABEL_TEXT.get(name, name),
         (x, y),
         xytext=(dx, dy),
         textcoords="offset points",
         ha="left" if dx > 0 else "right" if dx < 0 else "center",
         va="center",
-        fontsize=9,
+        fontsize=11,
         color=TEXT_PRIMARY,
     )
 for beach, site, x, y in dropped_sites.select(
     "beachName", "siteName", "x", "y"
 ).iter_rows():
+    offset, align = DROPPED_LABEL_PLACES[site]
     axis.annotate(
-        f"{site} (listed as {beach})",
+        f"{site}\n(listed as {beach})",
         (x, y),
-        xytext=(0, 12),
+        xytext=offset,
         textcoords="offset points",
-        ha="center",
-        fontsize=8,
+        ha=align,
+        va="bottom",
+        fontsize=10,
         color=TEXT_SECONDARY,
     )
 
@@ -193,10 +199,10 @@ cx.add_basemap(
     axis,
     crs="EPSG:3857",
     source=cx.providers.Esri.WorldGrayCanvas,
-    attribution_size=6,
+    attribution_size=8,
 )
 axis.set_axis_off()
-axis.legend(loc="upper left", frameon=True)
+axis.legend(loc="upper left", frameon=True, fontsize=12)
 figure.tight_layout()
 FIGURE_DIR.mkdir(parents=True, exist_ok=True)
 figure.savefig(FIGURE_DIR / "sampling-sites-map.png", dpi=300, bbox_inches="tight")
