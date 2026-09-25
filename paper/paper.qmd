@@ -12,6 +12,7 @@ number-sections: true
 crossref:
   title-delim: "."
 bibliography: references.bib
+csl: vancouver-brackets.csl
 execute:
   echo: false
   warning: false
@@ -23,6 +24,8 @@ execute:
 # Introduction {#sec-intro}
 
 *Paragraph 1, context: Toronto's ten swimming beaches are sampled daily in summer; the City posts a warning when *E. coli* exceeds 100 per 100 mL. Swimmers read the posting as today's water.*
+
+*E. coli* is a sign of faecal pollution. It lives in the gut of people and other warm-blooded animals, so finding it in lake water means that sewage, storm-water runoff or bird droppings have arrived recently, bringing the viruses and bacteria that make swimmers ill [@sanchez2021]. Swimming in water above Toronto's standard raises the risk of ear, eye, nose, throat and skin infections, and swallowed water can cause stomach illness. Young children, older people and people with weakened immune systems are most at risk [@tphabout].
 
 *Paragraph 2, what the paper does: 20 years of results from Open Data Toronto; two questions, whether some beaches go over the limit more often than others, and how well one day's result predicts the next. Gap: the City publishes the results but not a comparison across beaches or a check of the one-day delay.*
 
@@ -36,19 +39,17 @@ execute:
 
 ## Source and context {#sec-data-source}
 
-The data are the *E. coli* results from Toronto's beach water sampling program, published by Toronto Public Health on the City's open data portal [@tphdata; @opendatatoronto]. The program is run jointly by Toronto Public Health, Toronto Water, the police Marine Unit and the City's parks division, under a provincial protocol whose stated aim is to reduce water-borne illness [@tphdata]. Every summer, from late May to Labour Day, staff take a water sample each day at four to six fixed sites along the shore of each of the city's ten supervised beaches (@fig-sites-map). A laboratory counts the *E. coli* in each sample, and when the level at a beach is too high, Toronto Public Health posts signs warning against swimming [@tphbeachwq].
+The data are the *E. coli* results from Toronto's beach water sampling program, published by Toronto Public Health on the City's open data portal [@tphdata; @opendatatoronto]. The program is run jointly by Toronto Public Health, Toronto Water, the police Marine Unit and the City's parks division, under a provincial protocol whose stated aim is to reduce water-borne illness [@tphdata]. Every summer, from Victoria Day to Labour Day, staff take a water sample each day at four to six fixed sites along the shore of each of the city's ten supervised beaches (@fig-sites-map). A laboratory counts the *E. coli* in each sample, and when the level at a beach is too high, Toronto Public Health posts signs warning against swimming [@tphbeachwq].
 
 ![Each of Toronto's ten swimming beaches is sampled at four to six sites along the shore. Blue points are the 50 sites this paper uses. The two orange points, sites 60W and GP6, were added in 2026 and sit 14 to 16 km from the beaches they are listed under, so they are left out. Map tiles from Esri.](figures/sampling-sites-map.png){#fig-sites-map}
 
-The copy used here was downloaded on 22 September 2026. It has 102,534 rows, one for each site on each sampling day from 3 June 2007 to 16 September 2026, and each row gives the beach, a site code, the date the sample was collected, the *E. coli* result and the site's location. After leaving out rows with no result, one implausible reading, two sites listed under the wrong beach and dates outside the season (@sec-appendix-cleaning), 98,370 results remain, from 50 sites on 2,019 days across 20 years.
+The data set was downloaded on 22 September 2026. It has 102,534 rows, one for each site on each sampling day from 3 June 2007 to 16 September 2026, and each row gives the beach, a site code, the date the sample was collected, the *E. coli* result and the site's location. After leaving out rows with no result, one implausible reading, two sites listed under the wrong beach and dates outside the season (Appendix [-@sec-appendix-cleaning]), 98,370 results remain, from 50 sites on 2,019 days across 20 years.
 
-*E. coli* is measured as a sign of faecal pollution rather than because it is the main danger itself. It lives in the gut of people and other warm-blooded animals, so finding it in lake water means that sewage, storm-water runoff or bird droppings have reached the water recently, and with them the viruses and bacteria that make swimmers ill [@sanchez2021]. Swimming in water above the City's standard raises the risk of ear, eye, nose, throat and skin infections, and swallowing it can cause stomach upset, vomiting and diarrhoea. Young children, older people and people with weakened immune systems are most at risk [@tphabout].
+Toronto's standard is 100 *E. coli* per 100 mL of water; Ontario and Health Canada use 200 [@tphabout; @sanchez2021]. This paper uses 100, the level at which Toronto posts warnings.
 
-Toronto's standard is 100 *E. coli* per 100 mL of water. Ontario and Health Canada use 200, the figure in the federal guidelines since 2012, while Toronto has kept the earlier and stricter 100 [@tphabout; @sanchez2021]. This paper uses 100 throughout, because it is the level at which Toronto posts warnings.
+The data describe water, not people, and contain no personal information. The stakes lie in the advice built on them: a needless warning costs swimmers a beach day, and a missed one exposes them to illness [@saleem2023]. The City also offers daily swimming conditions for download [@tphbeachwq], but this paper uses the open data because they give every result, so each day's status can be worked out the same way for all twenty years.
 
-The data describe water, not people, and hold no personal information. What is at stake is the advice built on them. A warning posted when the water is clean costs swimmers a beach day, a warning missed when the water is dirty exposes them to a health risk, and both happen under the current system [@saleem2023]. The City's beach water quality page also offers each beach's daily swimming conditions for download [@tphbeachwq]. This paper uses the open data set instead because it gives every individual result, so each day's status can be worked out the same way for all twenty years.
-
-The analysis uses Python [@python], with Polars [@polars] and NumPy [@numpy] for the data, statsmodels [@statsmodels] for the model, pointblank [@pointblank] to test the data, matplotlib [@matplotlib] and contextily [@contextily] for the figures, and Quarto [@quarto] for the paper.
+The analysis uses Python [@python] with Polars [@polars], NumPy [@numpy], statsmodels [@statsmodels], pointblank [@pointblank], matplotlib [@matplotlib] and contextily [@contextily], and the paper is written in Quarto [@quarto].
 
 ## Measurement {#sec-data-measurement}
 
@@ -123,7 +124,7 @@ The ceiling matters more once results are averaged. Since 2018, 34 beach-days in
 
 # Model {#sec-model}
 
-*Points: the question the model answers (holding the day's weather fixed, does one beach run higher than another?). Equation: log10 daily geometric mean on beach and date, every symbol explained in words; the date term compares each beach only with the others sampled that day, so rain is not a confounder. What a coefficient means (0.3 on the log10 scale is about twice as high). Days over the limit come in runs, so the standard errors treat days in the same calendar month as related (about twice as wide as treating each day as independent). 45 pairs, Holm's correction explained. The floor and ceiling shrink the gaps to about 65% of their true size in simulation (@sec-appendix-validation).*
+*Points: the question the model answers (holding the day's weather fixed, does one beach run higher than another?). Equation: log10 daily geometric mean on beach and date, every symbol explained in words; the date term compares each beach only with the others sampled that day, so rain is not a confounder. What a coefficient means (0.3 on the log10 scale is about twice as high). Days over the limit come in runs, so the standard errors treat days in the same calendar month as related (about twice as wide as treating each day as independent). 45 pairs, Holm's correction explained. The floor and ceiling shrink the gaps to about 65% of their true size in simulation (Appendix [-@sec-appendix-validation]).*
 
 # Results {#sec-results}
 
