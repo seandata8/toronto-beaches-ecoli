@@ -43,6 +43,8 @@ Toronto uses 100 E. coli per 100 mL; Ontario and Health Canada use 200. A reader
 
 Covered in detail in `raw_data_findings.md`. The paper needs the short version: nothing is reported below 10, and from 2018 high readings are increasingly reported as exactly 1,000, with nothing above it in 2026. Both are properties of the laboratory's reporting, not of the water, and the ceiling understates how far the worst beaches sit above the rest.
 
+The ceiling can also hide a day over the limit, which deserves one to three sentences, not more. Of 290 beach-days since 2018 with a result of exactly 1,000, 34 have a geometric mean below 100. On about 8 of them a true reading of 2,000 or less would have put the day over the limit, and on about 18 a reading of 5,000 or less would have. So the count of days over the limit after 2018 is, if anything, slightly low. Details are in `raw_data_findings.md`, under "Could the ceiling have hidden a warning?".
+
 ## The two mislabelled sites
 
 `60W` and `GP6` appear in 2026 only and sit 14 to 16 km from the beaches they are listed under. They are dropped, and an email to the City went unanswered. One sentence in the cleaning appendix, with the distance, so the decision is checkable.
