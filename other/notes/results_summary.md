@@ -12,7 +12,7 @@ Two beaches are in a class of their own. Marie Curtis Park East was over Toronto
 
 The ranking survives every check. Across seasons the two dirtiest beaches range from 22% to 60% and from 21% to 47% of days, while the cleanest never pass 12% in any single season, so the groups never overlap. Splitting the record at 2018, when the reporting ceiling appeared, barely moves the numbers. And because the laboratory's floor and ceiling shrink differences by about a third, the true gaps are wider than these figures say.
 
-Against that, the daily warning is close to a coin toss. Results take about a day, so a posting describes yesterday's water. Of the days actually over the limit, 63% were not caught; of the warnings that would be posted, 63% were unnecessary. One day's reading explains about 14% of the variation in the next.
+Against that, the daily warning is a weak guide. Results take about a day, so a posting describes yesterday's water. It is better than nothing: a day after one over the limit is over the limit 37% of the time, against 10% after a day under it and 14% on any day. But of the days actually over the limit, 63% were not caught, and of the warnings that would be posted, 63% were unnecessary. One day's reading explains about 14% of the variation in the next.
 
 So a swimmer is better served by knowing which beach they are standing on than by yesterday's reading of it.
 
@@ -45,7 +45,7 @@ Three caveats travel with these numbers: they are days over the limit as compute
 
 **Days over the limit cluster heavily**: their variance across beach-seasons is 8.7 times the mean, where a Poisson distribution would give 1. A wet week posts a beach for several days running, so counting days as independent trials would understate the uncertainty badly. This is why the model's standard errors are clustered by month.
 
-## Question 2: yesterday's result is a poor guide to today
+## Question 2: yesterday's result is a weak guide to today
 
 Lab results take about 24 hours, so a posted warning reflects the previous day's water. Over 18,998 consecutive-day pairs:
 
@@ -62,14 +62,16 @@ Lab results take about 24 hours, so a posted warning reflects the previous day's
 
 The symmetry is not a coincidence — over a long record the number of days entering and leaving the over-limit state must balance.
 
-The correlation between one day's log10 geometric mean and the next is **0.424**, falling to **0.372** when pairs with both days at the reporting floor are dropped. Squaring the latter, one day explains about 14% of the variation in the next. Water quality changes faster than the testing can follow.
+**The warning still carries information.** Against a base rate of 14% (2,702 of 18,998 days over the limit), a day after one over the limit is over it 37% of the time (1,002 of 2,714), and a day after one under the limit only 10% of the time (1,700 of 16,284). A warning day is therefore about 3.5 times as likely to be over the limit as a day without one. It is not a coin toss; it is a weak signal that misses most dirty days and flags many clean ones.
+
+The correlation between one day's log10 geometric mean and the next is **0.424**, falling to **0.372** when pairs with both days at the reporting floor are dropped. Squaring the latter, one day explains about 14% of the variation in the next. Water quality changes faster than the testing can follow, but not so fast that yesterday says nothing.
 
 ## What this means
 
 The two findings pull in different directions, and the paper should say so:
 
 - Where you swim matters a great deal. Marie Curtis Park East and Sunnyside are over the limit roughly eight times as often as Gibraltar Point, and that holds across twenty seasons.
-- Whether today's posting is right is closer to a coin toss than swimmers likely assume. The delay between sampling and posting means a warning describes yesterday.
+- Today's posting is a weaker guide than swimmers likely assume. The delay between sampling and posting means a warning describes yesterday: it makes a dirty day about 3.5 times as likely, but it misses most dirty days and most warnings turn out unnecessary.
 
 A swimmer is better served by knowing which beach they are at than by yesterday's reading of the one they chose.
 
