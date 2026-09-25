@@ -1,171 +1,104 @@
 ---
-title: "My title"
-subtitle: "My subtitle if needed"
-author: 
-  - First author
-  - Another author
-thanks: "Code and data are available at: [https://github.com/RohanAlexander/starter_folder](https://github.com/RohanAlexander/starter_folder)."
+title: "Where You Swim in Toronto Matters More Than Yesterday's Test"
+subtitle: "Two beaches exceed the E. coli limit eight times as often as the cleanest, while a warning based on the previous day's samples misses most days over the limit"
+author:
+  - Sean Murphy
+thanks: "Code and data are available at: [https://github.com/seandata8/toronto-beaches-ecoli](https://github.com/seandata8/toronto-beaches-ecoli)."
 date: today
 date-format: long
-abstract: "First sentence. Second sentence. Third sentence. Fourth sentence."
+abstract: "Sentence 1: the general area (Toronto's beaches and the daily E. coli warning). Sentence 2: data and method (98,370 samples at ten beaches, 2007 to 2026, from Open Data Toronto; days over the limit, a same-day model, yesterday against today). Sentence 3: headline result (Marie Curtis Park East and Sunnyside over the limit on about a third of days, eight times Gibraltar Point; yesterday's samples catch 37% of days over the limit). Sentence 4: implication (knowing which beach you are at tells a swimmer more than yesterday's reading)."
 format: pdf
 number-sections: true
+crossref:
+  title-delim: "."
 bibliography: references.bib
 ---
 
-```{r}
-#| include: false
-#| warning: false
-#| message: false
+<!-- Skeleton. Each section lists the points it makes and where the numbers come from. Placeholder text is in italics. -->
 
-library(tidyverse)
-library(palmerpenguins)
-```
+# Introduction {#sec-intro}
 
+*Paragraph 1, context: Toronto's ten swimming beaches are sampled daily in summer; the City posts a warning when E. coli exceeds 100 per 100 mL. Swimmers read the posting as today's water.*
 
-# Introduction
+*Paragraph 2, what the paper does: 20 years of results from Open Data Toronto; two questions, whether some beaches go over the limit more often than others, and how well one day's result predicts the next. Gap: the City publishes the results but not a comparison across beaches or a check of the one-day delay.*
 
-Overview paragraph
+*Paragraph 3, what was found (specific numbers): Marie Curtis Park East 34% and Sunnyside 32% of days against Gibraltar Point 4%; same ranking in 19 of 20 years; a warning based on yesterday's samples catches 37% of days over the limit, and 37% of warnings are needed.*
 
-Estimand paragraph
+*Paragraph 4, why it matters: choose the beach, not the day; the posting is a weak guide.*
 
-Results paragraph
-
-Why it matters paragraph
-
-Telegraphing paragraph: The remainder of this paper is structured as follows. @sec-data....
-
-
-
-
-
+*Paragraph 5, structure: @sec-data describes the data and how a sample becomes a number, @sec-model the same-day model, @sec-results the results, @sec-discussion what they mean and their limits. The appendices cover cleaning and the check on simulated data.*
 
 # Data {#sec-data}
 
-## Overview
+## Source and context {#sec-data-source}
 
-We use the statistical programming language R [@citeR].... Our data [@shelter].... Following @tellingstories, we consider...
+*Points: the dataset (Open Data Toronto, Toronto Public Health), what one row is, dates covered, ten beaches and their sites. Why E. coli is measured (a marker of faecal contamination; illness risk from literature). Toronto's limit is 100 per 100 mL, Ontario and Health Canada use 200; the paper uses 100. Similar datasets and why this one. Ethics: public data, no personal information; the stakes are public health advice. Software: Python, Polars, matplotlib, statsmodels, Quarto.*
 
-Overview text
-
-## Measurement
-	
-Some paragraphs about how we go from a phenomena in the world to an entry in the dataset.
-
-## Outcome variables
-
-Add graphs, tables and text. Use sub-sub-headings for each outcome variable or update the subheading to be singular.
-
-
-
-@fig-sites-map shows...
+@fig-sites-map shows where the samples are taken.
 
 ![Each of Toronto's ten swimming beaches is sampled at four to six sites along the shore. Blue points are the 50 sites this paper uses. The two orange points, sites 60W and GP6, were added in 2026 and sit 14 to 16 km from the beaches they are listed under, so they are left out. Map tiles from Esri.](figures/sampling-sites-map.png){#fig-sites-map}
 
-@fig-raw-results shows...
+## Measurement {#sec-data-measurement}
+
+*Points: from the lake to a row in the dataset. Sampling protocol (depth, time of day, sites per beach), laboratory method, about 24 hours to a result. Reporting floor at 10 and, from 2018, ceiling at 1,000: properties of the laboratory's reporting, not of the water. Sunnyside has four sites, Kew Balmy six, the rest five.*
+
+@fig-raw-results shows every published result.
 
 ![Every result the City has published, 2007 to 2026. One point is one water sample (98,991 in total), before any cleaning. Points are spread sideways within each year so that they can be seen; the E. coli count itself is never moved. Most results are reported in multiples of 10, which is why the low readings fall into separate rows. The laboratory reports no results as zero, and "no colonies detected" is assumed to be reported as 10. From 2018 on, many results are reported as exactly 1,000, and these are assumed to be readings of 1,000 or more. The dashed line marks 100 E. coli per 100 mL, the level at which the City posts a swimming warning. The ringed point is the only reading the analysis removes.](figures/all-raw-results.png){#fig-raw-results}
 
-@fig-results-by-magnitude shows...
+## E. coli results by beach {#sec-data-samples}
+
+*Points: distribution of single samples at each beach; share above 100 per beach.*
+
+@fig-results-by-magnitude shows how high the results get at each beach.
 
 ![How high the results get, by beach. Every result the analysis uses (98,370), with each bar labelled by its share of that beach's results. Cleaning leaves out the reading of 6,191,768 removed as an error, two sites added in 2026 that sit far from the beaches they are listed under, and dates outside the sampling season. The orange bars, right of the dashed line, are the results above 100 E. coli per 100 mL, the limit the City of Toronto sets for safe swimming. Panels run from the beach with the largest share above that limit to the smallest. Each bar counts single samples rather than days: a beach is judged on the geometric mean of its four to six samples, and by that measure Marie Curtis Park East Beach was over the limit on 657 of its 1,925 sampled days (34%), against 35% of its samples.](figures/results-by-magnitude.png){#fig-results-by-magnitude}
 
-@fig-beach-days shows...
+## Days over the limit {#sec-data-days}
+
+*Points: a beach is judged on the geometric mean of its day's samples (explain geometric mean in plain words). Definition of a day over the limit (geometric mean above 100, at least four results). "Over the limit" is not "closed": the data do not record postings, the City may use a two-day mean, and results lag a day. Samples against days: the day share sits 1.2 to 5.5 points below the sample share, because a beach's sites rise and fall together.*
+
+@fig-beach-days shows every beach-day.
 
 ![Every beach-day, by beach. One point is the geometric mean of a beach's samples on one day, the figure the City's limit applies to (19,662 days in total). Days with fewer than four results are left out. Points are spread vertically so that they can be counted; the value itself is never moved. Orange points, right of the dashed line, are the days above 100 E. coli per 100 mL. Half of all samples are reported at 10, the lowest the laboratory measures, so the column at 10 is the days on which every sample was at that floor, and the stripes just above it are the values a geometric mean of four to six multiples of ten can take. The 17 days whose mean falls below 10 are off the left of the axis.](figures/all-beach-days.png){#fig-beach-days}
 
-## Predictor variables
+# Model {#sec-model}
 
-Add graphs, tables and text.
+*Points: the question the model answers (holding the day's weather fixed, does one beach run higher than another?). Equation: log10 daily geometric mean on beach and date, every symbol explained in words; the date term compares each beach only with the others sampled that day, so rain is not a confounder. What a coefficient means (0.3 on the log10 scale is about twice as high). Days over the limit come in runs, so the standard errors treat days in the same calendar month as related (about twice as wide as treating each day as independent). 45 pairs, Holm's correction explained. The floor and ceiling shrink the gaps to about 65% of their true size in simulation (@sec-appendix-validation).*
 
-Use sub-sub-headings for each outcome variable and feel free to combine a few into one if they go together naturally.
+# Results {#sec-results}
 
+## Two beaches are over the limit far more often than the rest {#sec-results-beaches}
 
+*Points: shares of days over the limit (34.1%, 31.8% down to 4.4%). Not a few bad years: same top two in 19 of 20 years, exception 2021. Not the ceiling: split at 2018 barely moves the shares. Model: Marie Curtis and Sunnyside 0.34 above the daily average (more than twice as high), not different from each other, different from every other beach; 31 or 32 of 45 pairs differ. Centre Island ranks above Kew Balmy in the model but below it in share of days, and why.*
 
+@fig-beach-estimates shows the model estimates.
 
+![Placeholder caption: each beach's typical level against the average beach on the same day, on the log10 scale, with 95% intervals. The gaps are understated: the reporting floor and ceiling shrink them to about two thirds of their true size.](figures/beach-estimates.png){#fig-beach-estimates}
 
+## Yesterday's samples are a weak guide to today's water {#sec-results-warning}
 
+*Points: 18,998 pairs of consecutive days at the same beach. A warning based on yesterday catches 37% of days over the limit, and 37% of such warnings are needed. 14% of days are over the limit overall, 37% after a warning, 10% after an all-clear (about 3.5 times as likely). Leave out overall accuracy.*
 
+*Table (to add): @tbl-warning, two-by-two from `other/results/warning-confusion-matrix.csv`.*
 
-# Model
+# Discussion {#sec-discussion}
 
-The goal of our modelling strategy is twofold. Firstly,...
+## Which beach you choose matters more than which day you go {#sec-disc-beach}
 
-Here we briefly describe the Bayesian analysis model used to investigate... Background details and diagnostics are included in [Appendix -@sec-model-details].
+*Points: summary of the finding; possible reasons from geography and literature (Etobicoke Creek at Marie Curtis, the Humber River near Sunnyside, storm-water outfalls, island against mainland beaches). Hypotheses, not tested here.*
 
-## Model set-up
+## A warning describes yesterday's water {#sec-disc-warning}
 
-Define $y_i$ as the number of seconds that the plane remained aloft. Then $\beta_i$ is the wing width and $\gamma_i$ is the wing length, both measured in millimeters.  
+*Points: the one-day lag; water changes faster than the testing can follow; same-day methods such as qPCR (literature).*
 
-\begin{align} 
-y_i|\mu_i, \sigma &\sim \mbox{Normal}(\mu_i, \sigma) \\
-\mu_i &= \alpha + \beta_i + \gamma_i\\
-\alpha &\sim \mbox{Normal}(0, 2.5) \\
-\beta &\sim \mbox{Normal}(0, 2.5) \\
-\gamma &\sim \mbox{Normal}(0, 2.5) \\
-\sigma &\sim \mbox{Exponential}(1)
-\end{align}
+## Weaknesses {#sec-disc-weaknesses}
 
-We run the model in R [@citeR] using the `rstanarm` package of @rstanarm. We use the default priors from `rstanarm`.
+*Points: days over the limit are computed, not recorded postings; the floor and ceiling understate the gaps; no weather data; Sunnyside's four sites add noise (effect under one percentage point in simulation).*
 
+## Next steps {#sec-disc-next}
 
-### Model justification
-
-We expect a positive relationship between the size of the wings and time spent aloft. In particular...
-
-We can use maths by including latex between dollar signs, for instance $\theta$.
-
-
-# Results
-
-Our results are summarized in @tbl-modelresults.
-
-```{r}
-#| echo: false
-#| eval: true
-#| warning: false
-#| message: false
-
-library(rstanarm)
-
-first_model <-
-  readRDS(file = here::here("models/first_model.rds"))
-```
-
-```{r}
-#| echo: false
-#| eval: true
-#| label: tbl-modelresults
-#| tbl-cap: "Explanatory models of flight time based on wing width and wing length"
-#| warning: false
-
-modelsummary::modelsummary(
-  list(
-    "First model" = first_model
-  ),
-  statistic = "mad",
-  fmt = 2
-)
-```
-
-
-
-
-# Discussion
-
-## First discussion point {#sec-first-point}
-
-If my paper were 10 pages, then should be be at least 2.5 pages. The discussion is a chance to show off what you know and what you learnt from all this. 
-
-## Second discussion point
-
-Please don't use these as sub-heading labels - change them to be what your point actually is.
-
-## Third discussion point
-
-## Weaknesses and next steps
-
-Weaknesses and next steps should also be included.
+*Points: add rainfall and wind to predict days over the limit; compare with recorded postings if the City publishes them.*
 
 \newpage
 
@@ -173,64 +106,18 @@ Weaknesses and next steps should also be included.
 
 # Appendix {-}
 
+# Data cleaning {#sec-appendix-cleaning}
 
-# Additional data details
+*Points: what was removed and why (the reading of 6,191,768, sites 60W and GP6 with a footnote on the City's reply and the download date of 22 September 2026, dates outside the season, days with fewer than four results). Tests run on the cleaned data.*
 
-# Model details {#sec-model-details}
+# Checking the method on simulated data {#sec-appendix-validation}
 
-## Posterior predictive check
+*Points: simulated data with known beach differences, the floor and ceiling; the analysis recovers the ordering; censoring leaves about 65% of a true gap; the site-count effect.*
 
-In @fig-ppcheckandposteriorvsprior-1 we implement a posterior predictive check. This shows...
+# Pairwise comparisons {#sec-appendix-pairs}
 
-In @fig-ppcheckandposteriorvsprior-2 we compare the posterior with the prior. This shows... 
-
-```{r}
-#| eval: true
-#| echo: false
-#| message: false
-#| warning: false
-#| label: fig-ppcheckandposteriorvsprior
-#| layout-ncol: 2
-#| fig-cap: "Examining how the model fits, and is affected by, the data"
-#| fig-subcap: ["Posterior prediction check", "Comparing the posterior with the prior"]
-
-pp_check(first_model) +
-  theme_classic() +
-  theme(legend.position = "bottom")
-
-posterior_vs_prior(first_model) +
-  theme_minimal() +
-  scale_color_brewer(palette = "Set1") +
-  theme(legend.position = "bottom") +
-  coord_flip()
-```
-
-## Diagnostics
-
-@fig-stanareyouokay-1 is a trace plot. It shows... This suggests...
-
-@fig-stanareyouokay-2 is a Rhat plot. It shows... This suggests...
-
-```{r}
-#| echo: false
-#| eval: true
-#| message: false
-#| warning: false
-#| label: fig-stanareyouokay
-#| fig-cap: "Checking the convergence of the MCMC algorithm"
-#| fig-subcap: ["Trace plot", "Rhat plot"]
-#| layout-ncol: 2
-
-plot(first_model, "trace")
-
-plot(first_model, "rhat")
-```
-
-
+*Points: the 45 pairs with Holm-corrected p-values, and the check with partial months merged. Table from `other/results/beach-pairwise-differences.csv` and `beach-pairwise-grouping-check.csv`.*
 
 \newpage
 
-
-# References
-
-
+# References {-}
