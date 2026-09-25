@@ -37,6 +37,8 @@ Three caveats travel with these numbers: they are days over the limit as compute
 
 **32 of the 45 pairs differ** after Holm's correction. The 13 that cannot be separated are mostly the middle and lower group, where the gaps are 0.01 to 0.06 on the log10 scale.
 
+**Check on the monthly grouping (25 September 2026).** The standard errors group days by calendar month, and the partial months at each end of the season (late May, early September) make small groups. Merging them into their neighbours (late May into June, early September into August) cuts the groups from 96 to 60 and changes the standard errors by −4% to +18% (median +6%). One pair changes: Bluffer's against Cherry goes from Holm-corrected p = 0.033 to 0.061, so 31 pairs differ instead of 32. Every other conclusion is unchanged, including the two worst beaches differing from all eight others. Bluffer's against Cherry is borderline and should not be relied on; the paper can say "31 or 32 of the 45 pairs, depending on how days are grouped", or simply "most pairs".
+
 **The ranking is not an artefact of a few summers.** Marie Curtis ranges from 22% to 60% of days across seasons and Sunnyside from 21% to 47%, while the cleanest beaches never exceed 12% in any season. The two groups do not overlap in any year.
 
 **Nor is it an artefact of the reporting ceiling.** Splitting at 2018, when the ceiling appeared, leaves the ranking essentially unchanged: Marie Curtis 36.9% before and 31.0% after, Gibraltar Point 5.0% and 3.8%.
