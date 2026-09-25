@@ -345,7 +345,7 @@ axis.tick_params(axis="x", colors=TEXT_SECONDARY, labelsize=9)
 axis.grid(axis="x", color=GRID_COLOUR, linewidth=0.5)
 axis.set_axisbelow(True)
 axis.set_xlabel(
-    "E. coli relative to the average beach sampled the same day (log scale)",
+    r"$\it{E.\,coli}$ relative to the average beach sampled the same day (log scale)",
     fontsize=10,
     color=TEXT_SECONDARY,
 )

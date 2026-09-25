@@ -1,24 +1,28 @@
 ---
 title: "Where You Swim in Toronto Matters More Than Yesterday's Test"
-subtitle: "Two beaches exceed the E. coli limit eight times as often as the cleanest, while a warning based on the previous day's samples misses most days over the limit"
+subtitle: "Two beaches exceed the *E. coli* limit eight times as often as the cleanest, while a warning based on the previous day's samples misses most days over the limit"
 author:
   - Sean Murphy
 thanks: "Code and data are available at: [https://github.com/seandata8/toronto-beaches-ecoli](https://github.com/seandata8/toronto-beaches-ecoli)."
 date: today
 date-format: long
-abstract: "Sentence 1: the general area (Toronto's beaches and the daily E. coli warning). Sentence 2: data and method (98,370 samples at ten beaches, 2007 to 2026, from Open Data Toronto; days over the limit, a same-day model, yesterday against today). Sentence 3: headline result (Marie Curtis Park East and Sunnyside over the limit on about a third of days, eight times Gibraltar Point; yesterday's samples catch 37% of days over the limit). Sentence 4: implication (knowing which beach you are at tells a swimmer more than yesterday's reading)."
+abstract: "Sentence 1: the general area (Toronto's beaches and the daily *E. coli* warning). Sentence 2: data and method (98,370 samples at ten beaches, 2007 to 2026, from Open Data Toronto; days over the limit, a same-day model, yesterday against today). Sentence 3: headline result (Marie Curtis Park East and Sunnyside over the limit on about a third of days, eight times Gibraltar Point; yesterday's samples catch 37% of days over the limit). Sentence 4: implication (knowing which beach you are at tells a swimmer more than yesterday's reading)."
 format: pdf
 number-sections: true
 crossref:
   title-delim: "."
 bibliography: references.bib
+execute:
+  echo: false
+  warning: false
+  message: false
 ---
 
 <!-- Skeleton. Each section lists the points it makes and where the numbers come from. Placeholder text is in italics. -->
 
 # Introduction {#sec-intro}
 
-*Paragraph 1, context: Toronto's ten swimming beaches are sampled daily in summer; the City posts a warning when E. coli exceeds 100 per 100 mL. Swimmers read the posting as today's water.*
+*Paragraph 1, context: Toronto's ten swimming beaches are sampled daily in summer; the City posts a warning when *E. coli* exceeds 100 per 100 mL. Swimmers read the posting as today's water.*
 
 *Paragraph 2, what the paper does: 20 years of results from Open Data Toronto; two questions, whether some beaches go over the limit more often than others, and how well one day's result predicts the next. Gap: the City publishes the results but not a comparison across beaches or a check of the one-day delay.*
 
@@ -32,35 +36,90 @@ bibliography: references.bib
 
 ## Source and context {#sec-data-source}
 
-*Points: the dataset (Open Data Toronto, Toronto Public Health), what one row is, dates covered, ten beaches and their sites. Why E. coli is measured (a marker of faecal contamination; illness risk from literature). Toronto's limit is 100 per 100 mL, Ontario and Health Canada use 200; the paper uses 100. Similar datasets and why this one. Ethics: public data, no personal information; the stakes are public health advice. Software: Python, Polars, matplotlib, statsmodels, Quarto.*
-
-@fig-sites-map shows where the samples are taken.
+The data are the *E. coli* results from Toronto's beach water sampling program, published by Toronto Public Health on the City's open data portal [@tphdata; @opendatatoronto]. The program is run jointly by Toronto Public Health, Toronto Water, the police Marine Unit and the City's parks division, under a provincial protocol whose stated aim is to reduce water-borne illness [@tphdata]. Every summer, from late May to Labour Day, staff take a water sample each day at four to six fixed sites along the shore of each of the city's ten supervised beaches (@fig-sites-map). A laboratory counts the *E. coli* in each sample, and when the level at a beach is too high, Toronto Public Health posts signs warning against swimming [@tphbeachwq].
 
 ![Each of Toronto's ten swimming beaches is sampled at four to six sites along the shore. Blue points are the 50 sites this paper uses. The two orange points, sites 60W and GP6, were added in 2026 and sit 14 to 16 km from the beaches they are listed under, so they are left out. Map tiles from Esri.](figures/sampling-sites-map.png){#fig-sites-map}
 
+The copy used here was downloaded on 22 September 2026. It has 102,534 rows, one for each site on each sampling day from 3 June 2007 to 16 September 2026, and each row gives the beach, a site code, the date the sample was collected, the *E. coli* result and the site's location. After leaving out rows with no result, one implausible reading, two sites listed under the wrong beach and dates outside the season (@sec-appendix-cleaning), 98,370 results remain, from 50 sites on 2,019 days across 20 years.
+
+*E. coli* is measured as a sign of faecal pollution rather than because it is the main danger itself. It lives in the gut of people and other warm-blooded animals, so finding it in lake water means that sewage, storm-water runoff or bird droppings have reached the water recently, and with them the viruses and bacteria that make swimmers ill [@sanchez2021]. Swimming in water above the City's standard raises the risk of ear, eye, nose, throat and skin infections, and swallowing it can cause stomach upset, vomiting and diarrhoea. Young children, older people and people with weakened immune systems are most at risk [@tphabout].
+
+Toronto's standard is 100 *E. coli* per 100 mL of water. Ontario and Health Canada use 200, the figure in the federal guidelines since 2012, while Toronto has kept the earlier and stricter 100 [@tphabout; @sanchez2021]. This paper uses 100 throughout, because it is the level at which Toronto posts warnings.
+
+The data describe water, not people, and hold no personal information. What is at stake is the advice built on them. A warning posted when the water is clean costs swimmers a beach day, a warning missed when the water is dirty exposes them to a health risk, and both happen under the current system [@saleem2023]. The City's beach water quality page also offers each beach's daily swimming conditions for download [@tphbeachwq]. This paper uses the open data set instead because it gives every individual result, so each day's status can be worked out the same way for all twenty years.
+
+The analysis uses Python [@python], with Polars [@polars] and NumPy [@numpy] for the data, statsmodels [@statsmodels] for the model, pointblank [@pointblank] to test the data, matplotlib [@matplotlib] and contextily [@contextily] for the figures, and Quarto [@quarto] for the paper.
+
 ## Measurement {#sec-data-measurement}
 
-*Points: from the lake to a row in the dataset. Sampling protocol (depth, time of day, sites per beach), laboratory method, about 24 hours to a result. Reporting floor at 10 and, from 2018, ceiling at 1,000: properties of the laboratory's reporting, not of the water. Sunnyside has four sites, Kew Balmy six, the rest five.*
+A number in the dataset is the end of a chain that starts with a person wading into the lake. At each site, staff fill a sterile bottle to 200 mL, plunging it to about 30 cm below the surface where people swim. The provincial protocol asks for at least five samples per beach, spread across the swimming area [@phobeach]. Most Toronto beaches have five sites; Kew Balmy has six and Sunnyside four. The bottles are kept cold and dark, and must reach a Public Health Ontario laboratory and be tested within a day of collection [@phobeach].
 
-@fig-raw-results shows every published result.
+The laboratory uses membrane filtration [@phobeach]. The water is passed through a filter with pores small enough to trap bacteria, and the filter is laid on a growth medium on which *E. coli* colonies can be told apart from other bacteria. Overnight, each *E. coli* cell grows into a colony large enough to see; the colonies are counted and the count is scaled to *E. coli* per 100 mL. The method detects more than 90% of *E. coli* strains, but cells stressed by the lake may not grow and other bacteria can interfere, so a single result carries error [@phobeach]. The process takes about a day [@tphabout; @tphbeachwq], so a result reaches the public a day after the water it describes. When no sample can be taken, usually because of bad weather, the row is kept with its result left blank [@tphabout]; 3.5% of rows are blank.
 
-![Every result the City has published, 2007 to 2026. One point is one water sample (98,991 in total), before any cleaning. Points are spread sideways within each year so that they can be seen; the E. coli count itself is never moved. Most results are reported in multiples of 10, which is why the low readings fall into separate rows. The laboratory reports no results as zero, and "no colonies detected" is assumed to be reported as 10. From 2018 on, many results are reported as exactly 1,000, and these are assumed to be readings of 1,000 or more. The dashed line marks 100 E. coli per 100 mL, the level at which the City posts a swimming warning. The ringed point is the only reading the analysis removes.](figures/all-raw-results.png){#fig-raw-results}
+The way results are reported leaves its mark on the numbers, as @fig-raw-results shows. Nearly all results (99.9%) are multiples of 10, and half (49%) are exactly 10. Ten is the lowest value the laboratory reports, so a result of 10 means "10 or fewer": the data have a floor. From 2018 a second limit appears at the top. Results of exactly 1,000 become common while results above 1,000 become rare, and in 2026 none is above 1,000, although before 2018 readings reached 15,820. From 2018, then, a result of 1,000 is best read as "1,000 or more". Both limits come from the reporting, not the water. The floor hides differences among the clean beaches, and the ceiling hides how bad the worst days were.
 
-## E. coli results by beach {#sec-data-samples}
+![Every result the City has published, 2007 to 2026. One point is one water sample (98,991 in total), before any cleaning. Points are spread sideways within each year so that they can be seen; the *E. coli* count itself is never moved. Most results are reported in multiples of 10, which is why the low readings fall into separate rows. The laboratory reports no results as zero, and "no colonies detected" is assumed to be reported as 10. From 2018 on, many results are reported as exactly 1,000, and these are assumed to be readings of 1,000 or more. The dashed line marks 100 *E. coli* per 100 mL, the level at which the City posts a swimming warning. The ringed point is the only reading the analysis removes.](figures/all-raw-results.png){#fig-raw-results}
 
-*Points: distribution of single samples at each beach; share above 100 per beach.*
+## *E. coli* results by beach {#sec-data-samples}
 
-@fig-results-by-magnitude shows how high the results get at each beach.
+@tbl-beach-summary summarises the results at each beach, and @fig-results-by-magnitude shows every one of them. Results span more than three orders of magnitude, so the figures use a logarithmic scale, on which each equal step is a tenfold increase: 10, 100, 1,000. Most results are low. The median, the middle result when all are put in order, is 20, and at eight of the ten beaches it is 10 or 20. Marie Curtis Park East and Sunnyside stand apart. Their medians are 50 and 60, only about a quarter and a fifth of their results are at the floor, and about a third are above 100. At Gibraltar Point, the cleanest beach, 61% of results are at the floor and 6% are above 100.
 
-![How high the results get, by beach. Every result the analysis uses (98,370), with each bar labelled by its share of that beach's results. Cleaning leaves out the reading of 6,191,768 removed as an error, two sites added in 2026 that sit far from the beaches they are listed under, and dates outside the sampling season. The orange bars, right of the dashed line, are the results above 100 E. coli per 100 mL, the limit the City of Toronto sets for safe swimming. Panels run from the beach with the largest share above that limit to the smallest. Each bar counts single samples rather than days: a beach is judged on the geometric mean of its four to six samples, and by that measure Marie Curtis Park East Beach was over the limit on 657 of its 1,925 sampled days (34%), against 35% of its samples.](figures/results-by-magnitude.png){#fig-results-by-magnitude}
+```{python}
+#| label: tbl-beach-summary
+#| tbl-cap: "Results at each beach, 2007 to 2026. A result is the number of *E. coli* per 100 mL in one water sample. Ten is the lowest value the laboratory reports, and 100 is Toronto's limit for swimming. The 90th percentile is the level that one result in ten exceeds. Beach-days are days with at least four results. Beaches run from the largest share of results above 100 to the smallest."
+#| tbl-colwidths: [31, 7, 10, 9, 12, 8, 10, 11]
+#| output: asis
+
+import polars as pl
+
+from toronto_beaches_ecoli.analysis import daily_geometric_means
+
+results = pl.read_csv(
+    "../data/02-analysis_data/analysis_data.csv", try_parse_dates=True
+)
+beach_days = daily_geometric_means(results).group_by("beachName").len("beachDays")
+summary = (
+    results.group_by("beachName")
+    .agg(
+        pl.col("siteName").n_unique().alias("sites"),
+        pl.len().alias("results"),
+        pl.col("eColi").median().alias("median"),
+        pl.col("eColi").quantile(0.9, "nearest").alias("p90"),
+        (pl.col("eColi") <= 10).mean().alias("atFloor"),
+        (pl.col("eColi") > 100).mean().alias("over100"),
+    )
+    .join(beach_days, on="beachName")
+    .sort("over100", descending=True)
+)
+
+print(
+    "| Beach | Sites | Results | Median | 90th percentile "
+    "| At 10 | Above 100 | Beach-days |"
+)
+print("|:--|--:|--:|--:|--:|--:|--:|--:|")
+for row in summary.iter_rows(named=True):
+    print(
+        f"| {row['beachName']} | {row['sites']} | {row['results']:,} "
+        f"| {row['median']:,.0f} | {row['p90']:,.0f} "
+        f"| {row['atFloor']:.0%} | {row['over100']:.0%} | {row['beachDays']:,} |"
+    )
+```
+
+![How high the results get, by beach. Every result the analysis uses (98,370), with each bar labelled by its share of that beach's results. Cleaning leaves out the reading of 6,191,768 removed as an error, two sites added in 2026 that sit far from the beaches they are listed under, and dates outside the sampling season. The orange bars, right of the dashed line, are the results above 100 *E. coli* per 100 mL, the limit the City of Toronto sets for safe swimming. Panels run from the beach with the largest share above that limit to the smallest. Each bar counts single samples rather than days: a beach is judged on the geometric mean of its four to six samples, and by that measure Marie Curtis Park East Beach was over the limit on 657 of its 1,925 sampled days (34%), against 35% of its samples.](figures/results-by-magnitude.png){#fig-results-by-magnitude}
 
 ## Days over the limit {#sec-data-days}
 
-*Points: a beach is judged on the geometric mean of its day's samples (explain geometric mean in plain words). Definition of a day over the limit (geometric mean above 100, at least four results). "Over the limit" is not "closed": the data do not record postings, the City may use a two-day mean, and results lag a day. Samples against days: the day share sits 1.2 to 5.5 points below the sample share, because a beach's sites rise and fall together.*
+Toronto's limit applies not to a single result but to the geometric mean of a beach's results. A geometric mean of $n$ results multiplies them together and takes the $n$th root; put another way, it averages the logarithms of the results and converts that average back. It suits counts that span orders of magnitude because a single extreme result does not dominate it. Five results of 10, 10, 10, 10 and 1,000 have an ordinary average of 208 but a geometric mean of 25.
 
-@fig-beach-days shows every beach-day.
+In this paper a beach-day is over the limit when the geometric mean of that day's results is above 100. Only days with at least four results count, four rather than five so that Sunnyside, with four sites, is included. That gives 19,662 beach-days, of which 2,816 (14%) are over the limit. @fig-beach-days shows every one. On 22% of beach-days every result was at the floor of 10.
 
-![Every beach-day, by beach. One point is the geometric mean of a beach's samples on one day, the figure the City's limit applies to (19,662 days in total). Days with fewer than four results are left out. Points are spread vertically so that they can be counted; the value itself is never moved. Orange points, right of the dashed line, are the days above 100 E. coli per 100 mL. Half of all samples are reported at 10, the lowest the laboratory measures, so the column at 10 is the days on which every sample was at that floor, and the stripes just above it are the values a geometric mean of four to six multiples of ten can take. The 17 days whose mean falls below 10 are off the left of the axis.](figures/all-beach-days.png){#fig-beach-days}
+![Every beach-day, by beach. One point is the geometric mean of a beach's samples on one day, the figure the City's limit applies to (19,662 days in total). Days with fewer than four results are left out. Points are spread vertically so that they can be counted; the value itself is never moved. Orange points, right of the dashed line, are the days above 100 *E. coli* per 100 mL. Half of all samples are reported at 10, the lowest the laboratory measures, so the column at 10 is the days on which every sample was at that floor, and the stripes just above it are the values a geometric mean of four to six multiples of ten can take. The 17 days whose mean falls below 10 are off the left of the axis.](figures/all-beach-days.png){#fig-beach-days}
+
+A day over the limit is not the same as a day the beach was posted, for three reasons. The data do not record whether a warning went up. A study of the program describes posting decisions based on a geometric mean over two days rather than one [@saleem2023]. And because results take a day, a warning posted today reflects yesterday's water. "Over the limit" here means that the water sampled that day exceeded 100, judged after the fact.
+
+Counting days rather than results changes the shares only a little. At every beach the share of days over the limit is 1.2 to 5.5 percentage points below the share of results above 100: Marie Curtis Park East, for example, was over the limit on 34% of days and had 35% of results above 100. Averaging five results might be expected to pull most days back under the limit, but it does not, because a beach's sites tend to rise and fall together. When one is high, the others usually are too.
+
+The ceiling matters more once results are averaged. Since 2018, 34 beach-days include a result of exactly 1,000 yet have a geometric mean below 100. On about 8 of them a true reading of 2,000 or less would have put the day over the limit, so the count of days over the limit from 2018 on is, if anything, slightly low.
 
 # Model {#sec-model}
 
@@ -98,7 +157,7 @@ bibliography: references.bib
 
 ## Next steps {#sec-disc-next}
 
-*Points: add rainfall and wind to predict days over the limit; compare with recorded postings if the City publishes them.*
+*Points: add rainfall and wind to predict days over the limit. Compare days over the limit with the warnings actually posted: the City's "Beach Condition Data for Researchers" download (JSON) may record them.*
 
 \newpage
 

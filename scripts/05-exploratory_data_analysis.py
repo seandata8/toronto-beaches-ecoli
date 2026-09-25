@@ -305,7 +305,9 @@ axis.yaxis.set_major_locator(FixedLocator(np.log10([10, 1_000, 100_000, 10_000_0
 axis.yaxis.set_major_formatter(count_formatter)
 axis.grid(axis="y", color=GRID_COLOUR, linewidth=0.5)
 axis.set_axisbelow(True)
-axis.set_ylabel("E. coli per 100 mL (log scale)", fontsize=10, color=TEXT_SECONDARY)
+axis.set_ylabel(
+    r"$\it{E.\,coli}$ per 100 mL (log scale)", fontsize=10, color=TEXT_SECONDARY
+)
 
 figure.tight_layout()
 figure.savefig(FIGURE_DIR / "all-raw-results.png", bbox_inches="tight")
@@ -391,7 +393,7 @@ for axis, beach in zip(axes.flat, summary_order):
     axis.axvline(1.5, color=TEXT_PRIMARY, linewidth=1, linestyle=(0, (6, 4)), zorder=3)
 
 figure.supylabel("Number of results", fontsize=10, color=TEXT_SECONDARY)
-figure.supxlabel("E. coli per 100 mL", fontsize=10, color=TEXT_SECONDARY)
+figure.supxlabel(r"$\it{E.\,coli}$ per 100 mL", fontsize=10, color=TEXT_SECONDARY)
 figure.tight_layout()
 figure.savefig(FIGURE_DIR / "results-by-magnitude.png", bbox_inches="tight")
 
@@ -494,7 +496,9 @@ axis.text(
     color=TEXT_SECONDARY,
 )
 
-axis.set_xlabel("E. coli per 100 mL (log scale)", fontsize=10, color=TEXT_SECONDARY)
+axis.set_xlabel(
+    r"$\it{E.\,coli}$ per 100 mL (log scale)", fontsize=10, color=TEXT_SECONDARY
+)
 figure.tight_layout()
 figure.savefig(FIGURE_DIR / "all-beach-days.png", bbox_inches="tight")
 

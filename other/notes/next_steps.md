@@ -39,3 +39,8 @@ Findings are in `results_summary.md`, with the method check in `method_validatio
 - A sketches folder is expected in the repo and does not exist yet.
 - The README still describes the starter template rather than this project.
 - The City replied on 25 September 2026 about sites `60W` and `GP6`: Toronto Public Health staff referred the listing to their IT team for correction, expected the following week, without saying which field is wrong. The sites stay dropped, as recorded in the cleaning script and in `raw_data_findings.md`. The saved raw data is unaffected by any later fix.
+## Open items from writing the paper (25 September 2026)
+
+- **Claims to check against the sources:** Saleem et al. (2023) for Toronto posting on a two-day geometric mean; Sanchez et al. (2021) for E. coli as a sign of faecal pollution and for the 2012 federal limit of 200.
+- **Final pass, layout:** the beach summary table splits across two pages, and the large figures each float onto their own page. Fix once all text is in.
+- **Next steps in the paper, not this paper:** the City's "Beach Condition Data for Researchers" download (JSON, linked from the Beach Water Quality page) may record the warnings actually posted. Comparing it with the computed days over the limit would test the "over the limit is not posted" caveat. Left out to keep the paper short.
