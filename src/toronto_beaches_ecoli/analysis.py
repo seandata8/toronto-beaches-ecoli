@@ -93,12 +93,14 @@ def fit_beach_model(daily: pl.DataFrame):
     wet week raises nobody's estimate. Each coefficient is a beach's average gap
     from the others, on the log10 scale, so 0.3 means about twice as high.
 
-    Standard errors are clustered by month of year, because levels carry over
-    from one day to the next and consecutive days are not independent trials.
+    Standard errors are clustered by calendar month (for example July 2019),
+    because levels carry over from one day to the next and consecutive days are
+    not independent trials. Partial months at the start and end of a season are
+    kept as smaller clusters.
 
     Subtracting the daily average uses up information the count of rows does not
     know about, so the reported degrees of freedom are slightly optimistic. With
-    around two hundred clusters the effect on the intervals is small.
+    96 clusters the effect on the intervals is small.
     """
     prepared = daily.with_columns(
         (

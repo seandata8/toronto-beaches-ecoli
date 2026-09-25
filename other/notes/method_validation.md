@@ -35,9 +35,9 @@ This is worth stating plainly because it cannot be shown from the real data: onl
 
 The model compares beaches on days when they were sampled together. For each day, the average across all beaches sampled that day is subtracted, which is what putting a term for every date in the model would do. What is left is how far each beach sat above or below the other beaches **that same day**, so a wet week raises nobody's estimate and rain cannot make one beach look worse than another.
 
-Each beach's coefficient is its average gap from the others on the log10 scale, so 0.3 means about twice as high. Standard errors are clustered by month of year, because levels carry over from one day to the next and a month's sampled days are not independent trials. The 45 pairwise comparisons are corrected by Holm's method, which raises the bar each test has to clear so that the chance of any false difference across the whole family stays near 5%.
+Each beach's coefficient is its average gap from the others on the log10 scale, so 0.3 means about twice as high. Standard errors are clustered by calendar month (for example July 2019), because levels carry over from one day to the next and a month's sampled days are not independent trials. The 45 pairwise comparisons are corrected by Holm's method, which raises the bar each test has to clear so that the chance of any false difference across the whole family stays near 5%.
 
-One caveat for honesty: subtracting each day's average uses up information that the count of rows does not know about, so the reported degrees of freedom are slightly optimistic. With around two hundred clusters the effect on the intervals is small.
+One caveat for honesty: subtracting each day's average uses up information that the count of rows does not know about, so the reported degrees of freedom are slightly optimistic. With about a hundred clusters (100 in the simulated data, 96 in the real data) the effect on the intervals is small.
 
 ## Software to cite
 
