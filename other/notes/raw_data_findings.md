@@ -51,6 +51,29 @@ So the data is censored at both ends, 10 below and 1,000 above, and the ceiling 
 - **The model is affected slightly.** Beach coefficients come from mean log10 values, and capping the top squeezes those means, more so after 2018 and more so at the beaches with the most high days. It touches 1–2% of samples, so the effect is small, but it runs in a known direction: it understates how far the worst beaches sit above the rest.
 - **Capped values stay in.** Dropping them would throw away the worst days, which is the opposite of what the question needs. The handling is to document the ceiling and report which way it biases the estimate.
 
+### Could the ceiling have hidden a warning?
+
+Checked on 25 September 2026 using `data/02-analysis_data/analysis_data.csv`. A warning depends on the beach's daily geometric mean, not on a single sample. So a capped 1,000 could hide a warning if the geomean with 1,000 in it is at or below 100 but the true value would have pushed it over.
+
+- 290 beach-days from 2018 on have at least one result of exactly 1,000. On 256 of them the geomean is over 100 anyway. On 34 it is below 100 (none is exactly 100). Every one of the 34 has a single 1,000.
+- For each of the 34, the true value needed to lift the geomean to 100 is x = 1000 × (100 / geomean)^n, where n is the number of samples that day. Raising the capped value can only raise the geomean.
+
+| True value needed for a geomean of 100 | Beach-days |
+|---|---|
+| 2,000 or less | 8 |
+| 5,000 or less | 18 |
+| over 20,000 | 9 (the ceiling almost certainly made no difference) |
+
+- The closest cases are Centre Island 2024-08-12 (about 1,130 needed), Centre Island 2025-08-22 (about 1,230), Marie Curtis 2023-08-25 (about 1,490), and Bluffer's 2020-06-15 and 2020-06-16 and Centre Island 2022-07-29 (about 1,670 each).
+- Centre Island has 13 of the 34 days, Sunnyside and Kew Balmy 5 each, Bluffer's 4, Woodbine and Marie Curtis 3 each, and Hanlan's Point 1.
+
+So the ceiling could have hidden a warning on a handful of days, roughly 8 to 18 over nine seasons, if the true reading was a few thousand. This changes the earlier point that counting days above 100 is unaffected: that holds for single samples, but not for the geomean-based warning.
+
+Caveats:
+
+- Values above 1,000 still appear every year from 2018 to 2025, so the ceiling is not applied to every sample. Some of these 1,000s may be real readings. Worth asking the City whether 1,000 is an upper reporting limit and when it applies.
+- Bluffer's 2020-06-15 and 2020-06-16 have the same five values (20, 50, 50, 120, 1000). This looks like one day's results entered twice.
+
 ## Warning rule
 
 - Toronto's standard is 100 E. coli per 100 mL. The provincial and federal standard is 200. [*About Beach Water Quality*]
