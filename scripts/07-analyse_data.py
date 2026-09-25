@@ -3,13 +3,14 @@
 # the same functions checked against the simulated data in
 # `scripts/06-validate_on_simulated_data.py`. Answers the two questions in
 # `other/notes/analysis_plan.md`: whether some beaches go over the limit more
-# often than others, and how well one day's result predicts the next.
+# often than others, and how well one day's result predicts the next. Saves the
+# tables to `other/results/` and the figure of beach estimates to `paper/figures/`.
 # Author: Sean Murphy
 # Date: 23 September 2026
 # Contact: seandata8@gmail.com
 # License: MIT
 # Pre-requisites:
-# - `polars`, `numpy` and `statsmodels` must be installed
+# - `polars`, `numpy`, `statsmodels` and `matplotlib` must be installed
 # - Run `uv run scripts/03-clean_data.py` first
 # - Run from the project root: uv run scripts/07-analyse_data.py
 
@@ -17,7 +18,10 @@
 #### Workspace setup ####
 from pathlib import Path
 
+import matplotlib.pyplot as plt
+import numpy as np
 import polars as pl
+from matplotlib.ticker import FixedLocator, NullLocator
 
 from toronto_beaches_ecoli.analysis import (
     consecutive_day_pairs,
@@ -33,6 +37,7 @@ from toronto_beaches_ecoli.analysis import (
 
 ANALYSIS_DATA_PATH = "data/02-analysis_data/analysis_data.csv"
 RESULTS_DIR = Path("other/results")
+FIGURE_DIR = Path("paper/figures")
 
 analysis_data = pl.read_csv(ANALYSIS_DATA_PATH, try_parse_dates=True)
 daily = daily_geometric_means(analysis_data)
@@ -221,3 +226,84 @@ differences.write_csv(RESULTS_DIR / "beach-pairwise-differences.csv")
 grouping_check.write_csv(RESULTS_DIR / "beach-pairwise-grouping-check.csv")
 agreement.write_csv(RESULTS_DIR / "warning-agreement.csv")
 print(f"\nSaved the tables to {RESULTS_DIR}")
+
+
+#### Figure: each beach against the others sampled the same day ####
+# The model's estimates as fold differences, 10 to the power of the log10 gap,
+# with 95% confidence intervals from the month-clustered standard errors.
+# Colours and text styles match `scripts/05-exploratory_data_analysis.py`.
+DATA_COLOUR = "#2a78d6"
+TEXT_PRIMARY = "#0b0b0b"
+TEXT_SECONDARY = "#52514e"
+GRID_COLOUR = "#e6e5e1"
+Z_95 = 1.96
+
+# The model uses names stripped of spaces and punctuation; map them back.
+display_names = {
+    name.replace(" ", "").replace("'", ""): name
+    for name in daily["beachName"].unique().to_list()
+}
+fold = (
+    coefficients.with_columns(
+        pl.col("beach").replace_strict(display_names).alias("beachName"),
+        (10 ** pl.col("estimate")).alias("fold"),
+        (10 ** (pl.col("estimate") - Z_95 * pl.col("standardError"))).alias("low"),
+        (10 ** (pl.col("estimate") + Z_95 * pl.col("standardError"))).alias("high"),
+    )
+    # Cleanest at the bottom, so the dirtiest beach reads first.
+    .sort("estimate")
+)
+
+plt.rcParams.update(
+    {
+        "figure.dpi": 200,
+        "font.size": 10,
+        "axes.spines.top": False,
+        "axes.spines.right": False,
+        "axes.edgecolor": GRID_COLOUR,
+    }
+)
+figure, axis = plt.subplots(figsize=(8, 4.2))
+rows = np.arange(fold.height)
+axis.hlines(rows, fold["low"], fold["high"], color=DATA_COLOUR, linewidth=2)
+# Short caps mark where each interval ends, since judging overlap is the point.
+for end in ("low", "high"):
+    axis.vlines(fold[end], rows - 0.15, rows + 0.15, color=DATA_COLOUR, linewidth=1.5)
+axis.scatter(fold["fold"], rows, s=36, color=DATA_COLOUR, zorder=3)
+axis.axvline(1, color=TEXT_PRIMARY, linewidth=1, linestyle=(0, (6, 4)), zorder=1)
+# Values in a column right of the plot, as in the beach-day figure, so that no
+# label collides with the line at 1.
+for row, value in enumerate(fold["fold"]):
+    axis.text(
+        1.02,
+        row,
+        f"{value:.2f}×",
+        transform=axis.get_yaxis_transform(),
+        va="center",
+        fontsize=9,
+        color=TEXT_SECONDARY,
+    )
+
+# A log scale, so that half as high and twice as high sit the same distance
+# from the line at 1.
+axis.set_xscale("log")
+ticks = [0.6, 0.8, 1, 1.25, 1.5, 2, 2.5]
+axis.xaxis.set_major_locator(FixedLocator(ticks))
+axis.xaxis.set_minor_locator(NullLocator())
+axis.set_xticklabels([f"{tick:g}×" for tick in ticks])
+axis.set_xlim(0.6, 2.8)
+axis.set_yticks(rows)
+axis.set_yticklabels(fold["beachName"], fontsize=10, color=TEXT_PRIMARY)
+axis.tick_params(axis="y", length=0)
+axis.tick_params(axis="x", colors=TEXT_SECONDARY, labelsize=9)
+axis.grid(axis="x", color=GRID_COLOUR, linewidth=0.5)
+axis.set_axisbelow(True)
+axis.set_xlabel(
+    "E. coli relative to the average beach sampled the same day (log scale)",
+    fontsize=10,
+    color=TEXT_SECONDARY,
+)
+figure.tight_layout()
+FIGURE_DIR.mkdir(parents=True, exist_ok=True)
+figure.savefig(FIGURE_DIR / "beach-estimates.png", bbox_inches="tight")
+print(f"Saved {FIGURE_DIR / 'beach-estimates.png'}")
