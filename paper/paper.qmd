@@ -130,11 +130,11 @@ where, in @eq-model, $G_{bd}$ is the beach's geometric mean that day, $\bar{L}_d
 
 ![Each beach's *E. coli* on a typical day, as a multiple of the average beach sampled the same day, 2007 to 2026, with 95% intervals. The reporting floor and ceiling make these gaps smaller than the true ones.](figures/beach-estimates.png){#fig-beach-estimates}
 
-[Yesterday vs today] Signs based on the previous day's samples were a weak guide to the water on the posting day (@tbl-warning, @tbl-sign-questions). When the "Safe" sign was up, the water was over the limit on 10% of days, and when the "Warning" sign was up, it was under the limit on 63%. Of the posting days with water over the limit, only 37% had a "Warning" sign. A "Warning" sign still made a day over the limit about 3.5 times as likely as a "Safe" sign (37% against 10%).
+[Yesterday vs today] @tbl-warning compares the sign posted at each beach with the water sampled on the posting day, for 18,998 pairs of consecutive days. The rows give the sign, "Warning" or "Safe", which is based on the previous day's samples; the columns give whether the posting day's water was over or under Toronto's limit. The sign was right on 1,002 days with a "Warning" sign and water over the limit, and on 14,584 days with a "Safe" sign and water under it. It was wrong on 1,712 days with a "Warning" sign and water under the limit, and on 1,700 days with a "Safe" sign and water over it. @tbl-sign-questions gives percentages derived from these counts, as answers to questions a beach-goer might ask.
 
 ```{python}
 #| label: tbl-warning
-#| tbl-cap: "Sign posted at each beach, based on the previous day's samples, against the water on the posting day, 2007 to 2026 (18,998 pairs of consecutive days). A \"Warning\" sign is posted when the previous day's geometric mean was above Toronto's limit of 100 *E. coli* per 100 mL, and a \"Safe\" sign otherwise. Each cell gives the number of pairs and its share of all pairs."
+#| tbl-cap: "Sign posted at each beach, based on the previous day's samples, against the water on the posting day, for pairs of consecutive days, 2007 to 2026. Each cell gives the number of pairs and its share of all pairs."
 #| tbl-colwidths: [34, 33, 33]
 #| output: asis
 
