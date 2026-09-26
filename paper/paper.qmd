@@ -126,7 +126,7 @@ where, in @eq-model, $G_{bd}$ is the beach's geometric mean that day, $\bar{L}_d
 
 ![How often each beach went over the limit, 2007 to 2026. Each bar counts the beach-days whose geometric mean falls in that range (19,662 days in total; days with fewer than four results are left out). Orange bars, right of the dashed line, are days above Toronto's limit of 100 *E. coli* per 100 mL. The lowest bin includes the 17 days whose mean falls below the reporting floor of 10. Panels run from the largest share of days over the limit to the smallest.](figures/beach-day-histogram.png){#fig-beach-days}
 
-[Model estimates] The same-day comparison gives the same ranking (@fig-beach-estimates). On a typical day, Marie Curtis Park East and Sunnyside each had about 2.2 times the *E. coli* of the average beach sampled that day (95% intervals 2.0 to 2.4 times), whereas Gibraltar Point had about a third less (0.66 times). The two worst beaches did not differ from each other (both 2.19 times), but each differed significantly from every other beach. Of the 45 pairs of beaches, 31 differed after Holm's correction (Appendix [-@sec-appendix-pairs]); the 14 that did not were Marie Curtis and Sunnyside, Centre Island and Kew Balmy, and 12 pairs among the six cleanest beaches. Centre Island ranks above Kew Balmy in the model (1.22 against 1.09 times) but below it in the share of days over the limit (14% against 16%), because the model compares typical levels on the same day, whereas the share counts only how often 100 is crossed. The gaps shown are smaller than the true gaps: in simulated data with known differences, the reporting floor and ceiling reduced the estimated gaps to about 65% of their true size, without reversing any of them (Appendix [-@sec-appendix-validation]).
+[Model estimates] The same-day comparison gives the same ranking (@fig-beach-estimates). On a typical day, Marie Curtis Park East and Sunnyside each had about 2.2 times the *E. coli* of the average beach sampled that day (95% intervals 2.0 to 2.4 times), whereas Gibraltar Point had about a third less (0.66 times). The two worst beaches did not differ from each other (both 2.19 times), but each differed significantly from every other beach. Of the 45 pairs of beaches, 31 differed after Holm's correction; the 14 that did not were Marie Curtis and Sunnyside, Centre Island and Kew Balmy, and 12 pairs among the six cleanest beaches. Centre Island ranks above Kew Balmy in the model (1.22 against 1.09 times) but below it in the share of days over the limit (14% against 16%), because the model compares typical levels on the same day, whereas the share counts only how often 100 is crossed. The gaps shown are smaller than the true gaps: in simulated data with known differences, the reporting floor and ceiling reduced the estimated gaps to about 65% of their true size, without reversing any of them (Appendix [-@sec-appendix-validation]).
 
 ![Each beach's *E. coli* on a typical day, as a multiple of the average beach sampled the same day, 2007 to 2026, with 95% intervals. The reporting floor and ceiling make these gaps smaller than the true ones.](figures/beach-estimates.png){#fig-beach-estimates}
 
@@ -217,10 +217,6 @@ print("|:--|--:|--:|")
 for row in gaps.iter_rows(named=True):
     print(f"| {row['gap']} | {row['high']:.3f} | {row['moderate']:.3f} |")
 ```
-
-# Pairwise comparisons {#sec-appendix-pairs}
-
-*[Pairwise table] Placeholder: the 45 pairs with Holm-corrected p-values, from `other/results/beach-pairwise-differences.csv`.*
 
 \newpage
 

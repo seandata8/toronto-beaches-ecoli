@@ -43,6 +43,5 @@ One bullet per paragraph, each with the [tag] that marks it in `paper/paper.qmd`
 ## Appendix
 - **[Cleaning details]** A. Data cleaning: every removal with counts and reasons, including the footnote on the City's reply about sites 60W and GP6
 - **[Simulation check]** B. (optional) Checking the method on simulated data
-- **[Pairwise table]** C. (optional) Table of pairwise comparisons between beaches
 
 ## References
