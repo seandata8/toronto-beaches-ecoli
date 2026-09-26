@@ -118,7 +118,7 @@ where, in @eq-model, $G_{bd}$ is the beach's geometric mean that day, $\bar{L}_d
 
 [Model] The standard error of each $\beta_b$ was calculated from the variation between calendar months rather than between days, because a wet week raises a beach's levels for several days running; this roughly doubles the width of the intervals compared with treating every day as independent. Each estimate is reported with a 95% interval: if the analysis were repeated over many different runs of summers, about 95% of such intervals would contain the true gap. Two beaches were judged to differ when a gap as large as the one observed would arise less than 5% of the time if they were in fact alike. Testing all 45 pairs this way would produce about two false differences by chance, so the comparisons were corrected by Holm's method, which raises the bar each comparison must clear so that the chance of any false difference stays near 5%.
 
-[Consecutive days] To measure how well a posting based on the previous day's samples describes the water on the day it is read, each beach-day was paired with the same beach's result on the day before. Days either side of a gap in sampling were not paired, which leaves 18,998 pairs. Treating yesterday's result as today's advice gives four outcomes: a warning when today's water is over the limit or under it, and an all-clear when today's water is over or under it. The counts of these outcomes form a two-by-two table, often called a confusion matrix. Two ratios summarise the table from a swimmer's point of view: the share of days over the limit that a warning caught, and the share of warnings that were needed. Overall accuracy, the share of days on which the advice was right, is not used, because most days are under the limit and a rule that never posted a warning would score 86%.
+[Consecutive days] Because results take about a day, the advice on display at a beach on any day, called here the posting day, is based on the samples taken the day before. To measure how often that advice was right, each posting day was paired with the previous day at the same beach, using only days that were consecutive (18,998 pairs). A warning was taken to be posted if the previous day's geometric mean was over the limit, and no warning if it was not. That advice was then compared with the water sampled on the posting day itself to assess if the advice matched the water quality on the posting day.
 
 # Results {#sec-results}
 
@@ -130,21 +130,22 @@ where, in @eq-model, $G_{bd}$ is the beach's geometric mean that day, $\bar{L}_d
 
 ![Placeholder caption: each beach's typical level against the average beach on the same day, on the log10 scale, with 95% intervals. The gaps are understated: the reporting floor and ceiling shrink them to about two thirds of their true size.](figures/beach-estimates.png){#fig-beach-estimates}
 
-*[Yesterday vs today] Placeholder: @tbl-warning (two-by-two from `other/results/warning-confusion-matrix.csv`); a warning based on yesterday catches 37% of days over the limit, and 37% of such warnings are needed; 14% of days are over the limit overall, 37% after a warning, 10% after an all-clear (about 3.5 times as likely). Leave out overall accuracy.*
+*[Yesterday vs today] Placeholder: @tbl-warning; name the four outcomes the table shows (correct warning, false warning, missed warning, correct no-warning), each tied to the posting day's water; avoid the term "confusion matrix" or explain it; of the posting days with water over the limit, 37% had a warning posted; of the warnings posted, 37% were correct; 14% of posting days have water over the limit overall, 37% after a warning and 10% with no warning (about 3.5 times as likely). Leave out overall accuracy.*
 
 ```{python}
 #| label: tbl-warning
-#| tbl-cap: "Yesterday's advice against today's water at the same beach, 2007 to 2026 (18,998 pairs of consecutive days). A warning means yesterday's geometric mean was above Toronto's limit of 100 *E. coli* per 100 mL; an all-clear means it was not. Each cell gives the number of pairs and its share of all pairs."
+#| tbl-cap: "Advice posted at each beach, based on the previous day's samples, against the water on the posting day, 2007 to 2026 (18,998 pairs of consecutive days). A warning is posted when the previous day's geometric mean was above Toronto's limit of 100 *E. coli* per 100 mL. Each cell gives the number of pairs and its share of all pairs."
 #| tbl-colwidths: [34, 33, 33]
 #| output: asis
 
 confusion = pl.read_csv("../other/results/warning-confusion-matrix.csv")
+ADVICE_LABELS = {"Warning": "Warning posted", "All-clear": "No warning posted"}
 
-print("| Yesterday's advice | Today over the limit | Today under the limit |")
+print("| Advice | Water over the limit on the posting day | Water under the limit |")
 print("|:--|--:|--:|")
 for row in confusion.iter_rows(named=True):
     print(
-        f"| {row['advice']} "
+        f"| {ADVICE_LABELS[row['advice']]} "
         f"| {row['overTodayDays']:,} ({row['overTodayShare']:.1%}) "
         f"| {row['underTodayDays']:,} ({row['underTodayShare']:.1%}) |"
     )
