@@ -282,7 +282,7 @@ axis.annotate(
     xytext=(16, -34),
     textcoords="offset points",
     ha="left",
-    fontsize=7,
+    fontsize=9,
     color=THRESHOLD_COLOUR,
     arrowprops={
         "arrowstyle": "->",
@@ -294,6 +294,8 @@ axis.annotate(
 )
 axis.legend(
     loc="upper right",
+    # Just above the tallest points rather than at the top of the axis.
+    bbox_to_anchor=(1, 0.71),
     frameon=False,
     fontsize=9,
     handlelength=3,
