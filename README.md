@@ -43,6 +43,8 @@ cd paper && uv run quarto render paper.qmd        # render paper/paper.pdf
 
 The paper reads only the saved files in `data/`, `other/results/` and `paper/figures/`, so it can be rendered without running the scripts. Running `02-download_data.py` again replaces the saved raw data with the current version on Open Data Toronto, which may differ from the 22 September 2026 download used in the paper. The map in `05-exploratory_data_analysis.py` downloads basemap tiles, so that script needs an internet connection.
 
+Code is formatted and linted with ruff (`uv run ruff format .` and `uv run ruff check .`).
+
 ## Statement on LLM usage
 
 Claude (Anthropic) was used throughout this project, and every chat is included in full in `other/llm_usage/`:
