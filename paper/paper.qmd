@@ -164,7 +164,6 @@ safe_days = safe["overTodayDays"] + safe["underTodayDays"]
 over_days = warning["overTodayDays"] + safe["overTodayDays"]
 questions = [
     ("On any posting day, how often was the water over the limit?", over_days / (warning_days + safe_days)),
-    ('When the "Warning" sign was up, how often was the water over the limit?', warning["overTodayDays"] / warning_days),
     ('When the "Warning" sign was up, how often was the water under the limit?', warning["underTodayDays"] / warning_days),
     ('When the "Safe" sign was up, how often was the water over the limit?', safe["overTodayDays"] / safe_days),
     ('When the water was over the limit, how often was the "Warning" sign up?', warning["overTodayDays"] / over_days),
