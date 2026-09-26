@@ -90,6 +90,19 @@ halves = (
 #### Question 2: how well does one day predict the next? ####
 pairs = consecutive_day_pairs(daily)
 agreement = warning_agreement(pairs)
+
+# How often the water was over the limit when the "Safe" sign was up (the
+# previous day was under the limit), beach by beach.
+over_under_safe_sign = (
+    pairs.filter(~pl.col("previousOverLimit"))
+    .group_by("beachName")
+    .agg(
+        pl.len().alias("safeSignDays"),
+        pl.col("overLimit").sum().alias("daysOverLimit"),
+        pl.col("overLimit").mean().alias("share"),
+    )
+    .sort("share", descending=True)
+)
 correlation = day_to_day_correlation(pairs)
 
 # Of the days that were actually over the limit, how many did yesterday's result
@@ -192,6 +205,8 @@ show(
 )
 
 print("\n\nQuestion 2: treating yesterday's result as today's advice")
+print('\nWater over the limit when the "Safe" sign was up, by beach')
+show(over_under_safe_sign.with_columns(pl.col("share").round(3)))
 show(agreement.with_columns(pl.col("share").round(3)))
 print(f"\nConsecutive-day pairs: {correlation['pairs']:,}")
 print(f"Days actually over the limit: {over_today:,}")
@@ -226,6 +241,7 @@ differences.write_csv(RESULTS_DIR / "beach-pairwise-differences.csv")
 inflation.write_csv(RESULTS_DIR / "beach-model-standard-errors.csv")
 agreement.write_csv(RESULTS_DIR / "warning-agreement.csv")
 confusion.write_csv(RESULTS_DIR / "warning-confusion-matrix.csv")
+over_under_safe_sign.write_csv(RESULTS_DIR / "over-limit-under-safe-sign-by-beach.csv")
 print(f"\nSaved the tables to {RESULTS_DIR}")
 
 
