@@ -1,2 +1,1 @@
-def main() -> None:
-    print("Hello from toronto-beaches-ecoli!")
+"""Analysis of E. coli results at Toronto's supervised beaches."""

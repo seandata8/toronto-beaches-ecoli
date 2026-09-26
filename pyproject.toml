@@ -1,7 +1,7 @@
 [project]
 name = "toronto-beaches-ecoli"
 version = "0.1.0"
-description = "Add your description here"
+description = "How often Toronto's beaches exceed the E. coli swimming limit, and how well the daily sign matches the water, 2007 to 2026"
 readme = "README.md"
 authors = [
     { name = "Sean Murphy", email = "seandata8@gmail.com" }
@@ -15,9 +15,6 @@ dependencies = [
     "statsmodels>=0.15.0",
 ]
 
-[project.scripts]
-toronto-beaches-ecoli = "toronto_beaches_ecoli:main"
-
 [build-system]
 requires = ["uv_build>=0.12.11,<0.13.0"]
 build-backend = "uv_build"
@@ -27,4 +24,5 @@ dev = [
     "contextily>=1.7.1",
     "jupyter>=1.1.1",
     "matplotlib>=3.11.2",
+    "ruff>=0.16.9",
 ]
