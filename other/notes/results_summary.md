@@ -8,7 +8,7 @@ Produced 23 September 2026 by `scripts/07-analyse_data.py`, using the functions 
 
 **Which beach you choose matters far more than which day you go.**
 
-Two beaches are in a class of their own. Marie Curtis Park East was over Toronto's limit on 34.1% of its sampled days and Sunnyside on 31.8%, against 4.4% at Gibraltar Point: roughly eight times as often. Both sit 0.34 above the daily average on the log10 scale, meaning more than twice the E. coli of the average beach on the same day. They cannot be told apart from each other, and every other beach is clearly below them. Of the 45 pairs of beaches, 32 differ after correcting for the number of comparisons.
+Two beaches are in a class of their own. Marie Curtis Park East was over Toronto's limit on 34.1% of its sampled days and Sunnyside on 31.8%, against 4.4% at Gibraltar Point: 7.8 and 7.2 times as often, so "more than seven times" (not "eight"; the sample shares give about six). Both sit 0.34 above the daily average on the log10 scale, meaning more than twice the E. coli of the average beach on the same day. They cannot be told apart from each other, and every other beach is clearly below them. Of the 45 pairs of beaches, 32 differ after correcting for the number of comparisons.
 
 The ranking survives every check. Across years the two dirtiest beaches range from 22% to 60% and from 21% to 47% of days, and in 19 of the 20 years both were over the limit more often than every other beach; the exception is 2021, when Kew Balmy (26.9%) passed Sunnyside (24.8%). Splitting the record at 2018, when the reporting ceiling appeared, barely moves the numbers. And because the laboratory's floor and ceiling shrink differences by about a third, the true gaps are wider than these figures say.
 
@@ -74,7 +74,7 @@ The correlation between one day's log10 geometric mean and the next is **0.424**
 
 The two findings pull in different directions, and the paper should say so:
 
-- Where you swim matters a great deal. Marie Curtis Park East and Sunnyside are over the limit roughly eight times as often as Gibraltar Point, and that holds across twenty years.
+- Where you swim matters a great deal. Marie Curtis Park East and Sunnyside are over the limit more than seven times as often as Gibraltar Point, and that holds across twenty years.
 - Today's posting is a weaker guide than swimmers likely assume. The delay between sampling and posting means a warning describes yesterday: it makes a dirty day about 3.5 times as likely, but it misses most dirty days and most warnings turn out unnecessary.
 
 A swimmer is better served by knowing which beach they are at than by yesterday's reading of the one they chose.

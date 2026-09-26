@@ -1,12 +1,12 @@
 ---
-title: "Where You Swim in Toronto Matters More Than Yesterday's Test"
-subtitle: "Two beaches exceed the *E. coli* limit eight times as often as the cleanest, while a warning based on the previous day's samples misses most days over the limit"
+title: "*E. coli* at Toronto's Beaches: Are Some Beaches Less Safe Than Others?"
+subtitle: "Marie Curtis Park East and Sunnyside exceed the swimming limit on a third of summer days, more than seven times as often as Gibraltar Point"
 author:
   - Sean Murphy
 thanks: "Code and data are available at: [https://github.com/seandata8/toronto-beaches-ecoli](https://github.com/seandata8/toronto-beaches-ecoli)."
 date: today
 date-format: long
-abstract: "Sentence 1: the general area (Toronto's beaches and the daily *E. coli* warning). Sentence 2: data and method (98,370 samples at ten beaches, 2007 to 2026, from Open Data Toronto; days over the limit, a same-day model, yesterday against today). Sentence 3: headline result (Marie Curtis Park East and Sunnyside over the limit on about a third of days, eight times Gibraltar Point; yesterday's samples catch 37% of days over the limit). Sentence 4: implication (knowing which beach you are at tells a swimmer more than yesterday's reading)."
+abstract: "Sentence 1: the general area (Toronto's beaches and the daily *E. coli* warning). Sentence 2: data and method (98,370 samples at ten beaches, 2007 to 2026, from Open Data Toronto; days over the limit, a same-day model, yesterday against today). Sentence 3: headline result (Marie Curtis Park East and Sunnyside over the limit on about a third of days, more than seven times Gibraltar Point; yesterday's samples catch 37% of days over the limit). Sentence 4: implication (knowing which beach you are at tells a swimmer more than yesterday's reading)."
 format: pdf
 number-sections: true
 crossref:
