@@ -2,8 +2,7 @@
 title: "*E. coli* at Toronto's Beaches: Are Some Beaches Less Safe Than Others?"
 subtitle: "Marie Curtis Park East and Sunnyside exceed the swimming limit on a third of summer days, more than seven times as often as Gibraltar Point"
 author:
-  - Sean Murphy
-thanks: "Code and data are available at: [https://github.com/seandata8/toronto-beaches-ecoli](https://github.com/seandata8/toronto-beaches-ecoli)."
+  - "Sean Murphy`\\thanks{Code and data are available at: \\url{https://github.com/seandata8/toronto-beaches-ecoli}.}`{=latex}"
 date: today
 date-format: long
 abstract: "Toronto tests the water at its ten swimming beaches every summer day and posts a warning when *E. coli*, a sign of faecal pollution, exceeds its limit. Using 98,370 results published by the City from 2007 to 2026, this paper compares how often each beach was over the limit and how well a sign based on the previous day's samples matched the water quality on the day it was posted. Marie Curtis Park East and Sunnyside were over the limit on about a third of days, more than seven times as often as the cleanest beach, whereas the daily sign missed nearly two thirds of the days over the limit. For swimmers, the choice of beach says more about the water quality than the sign posted on that day."
