@@ -377,7 +377,7 @@ for axis, (beach, share) in zip(axes.flat, day_shares.iter_rows()):
         linewidth=1,
         linestyle=(0, (6, 4)),
     )
-    axis.set_title(fill(beach, width=18), fontsize=9.5, loc="left")
+    axis.set_title(fill(beach, width=18), fontsize=11.5, loc="left")
     axis.text(
         0.97,
         0.80,
@@ -390,14 +390,14 @@ for axis, (beach, share) in zip(axes.flat, day_shares.iter_rows()):
         color=ABOVE_THRESHOLD_COLOUR,
     )
     axis.set_xticks(range(len(BIN_LABELS)))
-    axis.set_xticklabels(BIN_LABELS, fontsize=7, rotation=90)
+    axis.set_xticklabels(BIN_LABELS, fontsize=8, rotation=90)
     axis.grid(axis="y", color=GRID_COLOUR, linewidth=0.5)
     axis.set_axisbelow(True)
 
-figure.supylabel("Number of beach-days", fontsize=10, color=TEXT_SECONDARY)
+figure.supylabel("Number of beach-days", fontsize=12, color=TEXT_SECONDARY)
 figure.supxlabel(
     r"Daily geometric mean, $\it{E.\,coli}$ per 100 mL",
-    fontsize=10,
+    fontsize=12,
     color=TEXT_SECONDARY,
 )
 figure.tight_layout()
