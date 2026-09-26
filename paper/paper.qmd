@@ -118,7 +118,7 @@ where, in @eq-model, $G_{bd}$ is the beach's geometric mean that day, $\bar{L}_d
 
 [Model] The standard error of each $\beta_b$ was calculated from the variation between months rather than between days, because a wet week raises a beach's levels for several days running. The few sampling days in late May and early September were counted with June and August. Grouping days this way roughly doubles the width of the intervals compared with treating every day as independent. Each estimate is reported with a 95% interval: if the analysis were repeated over many different runs of summers, about 95% of such intervals would contain the true gap. Two beaches were said to differ significantly when a gap as large as the one observed would arise less than 5% of the time if they were in fact alike. Testing all 45 pairs this way would produce about two false differences by chance, so the comparisons were corrected by Holm's method, which raises the bar each comparison must clear so that the chance of any false difference stays near 5%.
 
-[Consecutive days] Because results take about a day, the advice on display at a beach on any day, called here the posting day, is based on the samples taken the day before. To measure how often that advice was right, each posting day was paired with the previous day at the same beach, using only days that were consecutive (18,998 pairs). A warning was taken to be posted if the previous day's geometric mean was over the limit, and no warning if it was not. That advice was then compared with the water sampled on the posting day itself.
+[Consecutive days] Because results take about a day, the sign on display at a beach on any day, called here the posting day, is based on the samples taken the day before. The City posts a "Warning" sign when *E. coli* is over its limit and a "Safe" sign otherwise [@tphabout]. To measure how often the sign was right, each posting day was paired with the previous day at the same beach, using only days that were consecutive (18,998 pairs). The sign on the posting day was taken to be "Warning" if the previous day's geometric mean was over the limit, and "Safe" if it was not. That sign was then compared with the water sampled on the posting day itself.
 
 # Results {#sec-results}
 
@@ -130,25 +130,49 @@ where, in @eq-model, $G_{bd}$ is the beach's geometric mean that day, $\bar{L}_d
 
 ![Each beach's *E. coli* on a typical day, as a multiple of the average beach sampled the same day, 2007 to 2026, with 95% intervals. The reporting floor and ceiling make these gaps smaller than the true ones.](figures/beach-estimates.png){#fig-beach-estimates}
 
-*[Yesterday vs today] Placeholder: @tbl-warning; name the four outcomes the table shows (correct warning, false warning, missed warning, correct no-warning), each tied to the posting day's water; avoid the term "confusion matrix" or explain it; of the posting days with water over the limit, 37% had a warning posted; of the warnings posted, 37% were correct; 14% of posting days have water over the limit overall, 37% after a warning and 10% with no warning (about 3.5 times as likely). Leave out overall accuracy.*
+[Yesterday vs today] Signs based on the previous day's samples were a weak guide to the water on the posting day (@tbl-warning, @tbl-sign-questions). When the "Safe" sign was up, the water was over the limit on 10% of days, and when the "Warning" sign was up, it was under the limit on 63%. Of the posting days with water over the limit, only 37% had a "Warning" sign. A "Warning" sign still made a day over the limit about 3.5 times as likely as a "Safe" sign (37% against 10%).
 
 ```{python}
 #| label: tbl-warning
-#| tbl-cap: "Advice posted at each beach, based on the previous day's samples, against the water on the posting day, 2007 to 2026 (18,998 pairs of consecutive days). A warning is posted when the previous day's geometric mean was above Toronto's limit of 100 *E. coli* per 100 mL. Each cell gives the number of pairs and its share of all pairs."
+#| tbl-cap: "Sign posted at each beach, based on the previous day's samples, against the water on the posting day, 2007 to 2026 (18,998 pairs of consecutive days). A \"Warning\" sign is posted when the previous day's geometric mean was above Toronto's limit of 100 *E. coli* per 100 mL, and a \"Safe\" sign otherwise. Each cell gives the number of pairs and its share of all pairs."
 #| tbl-colwidths: [34, 33, 33]
 #| output: asis
 
 confusion = pl.read_csv("../other/results/warning-confusion-matrix.csv")
-ADVICE_LABELS = {"Warning": "Warning posted", "All-clear": "No warning posted"}
+SIGN_LABELS = {"Warning": "\"Warning\" sign", "All-clear": "\"Safe\" sign"}
 
-print("| Advice | Water over the limit on the posting day | Water under the limit |")
+print("| Sign posted | Water over the limit on the posting day | Water under the limit |")
 print("|:--|--:|--:|")
 for row in confusion.iter_rows(named=True):
     print(
-        f"| {ADVICE_LABELS[row['advice']]} "
+        f"| {SIGN_LABELS[row['advice']]} "
         f"| {row['overTodayDays']:,} ({row['overTodayShare']:.1%}) "
         f"| {row['underTodayDays']:,} ({row['underTodayShare']:.1%}) |"
     )
+```
+
+```{python}
+#| label: tbl-sign-questions
+#| tbl-cap: "What the sign says about the water on the posting day, 2007 to 2026, derived from the counts in @tbl-warning. The sign is based on the previous day's samples."
+#| tbl-colwidths: [85, 15]
+#| output: asis
+
+counts = {row["advice"]: row for row in confusion.iter_rows(named=True)}
+warning, safe = counts["Warning"], counts["All-clear"]
+warning_days = warning["overTodayDays"] + warning["underTodayDays"]
+safe_days = safe["overTodayDays"] + safe["underTodayDays"]
+over_days = warning["overTodayDays"] + safe["overTodayDays"]
+questions = [
+    ("On any posting day, how often was the water over the limit?", over_days / (warning_days + safe_days)),
+    ('When the "Warning" sign was up, how often was the water over the limit?', warning["overTodayDays"] / warning_days),
+    ('When the "Warning" sign was up, how often was the water under the limit?', warning["underTodayDays"] / warning_days),
+    ('When the "Safe" sign was up, how often was the water over the limit?', safe["overTodayDays"] / safe_days),
+    ('When the water was over the limit, how often was the "Warning" sign up?', warning["overTodayDays"] / over_days),
+]
+print("| Question | Answer |")
+print("|:--|--:|")
+for question, share in questions:
+    print(f"| {question} | {share:.0%} |")
 ```
 
 # Discussion {#sec-discussion}
