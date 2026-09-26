@@ -62,7 +62,7 @@ execute:
 
 ```{python}
 #| label: tbl-beach-summary
-#| tbl-cap: "Results at each beach, 2007 to 2026. A result is the number of *E. coli* per 100 mL in one water sample. Ten is usually the lowest value the laboratory reports, and 100 is Toronto's limit for swimming. The 90th percentile is the level that one result in ten exceeds. Beach-days are days with at least four results. Beaches run from the largest share of results above 100 to the smallest."
+#| tbl-cap: "Results at each beach, 2007 to 2026. A result is the number of *E. coli* per 100 mL in one water sample. Ten is usually the lowest value the laboratory reports, and 100 is Toronto's limit for swimming. The 90th percentile is the level that one result in ten exceeds. Beach-days are days with at least four results. Beaches are listed from the highest % above 100 to the lowest."
 #| tbl-colwidths: [31, 6, 10, 10, 14, 7, 11, 11]
 #| output: asis
 
