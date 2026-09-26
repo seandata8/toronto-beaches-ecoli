@@ -1,30 +1,53 @@
-# Starter folder
+# Twenty Years of *E. coli* at Toronto's Beaches
 
 ## Overview
 
-This repo provides students with a foundation for their own projects associated with *Telling Stories with Data*. You do not need every aspect for every paper and you should delete aspects that you do not need.
+Toronto Public Health samples the water at the city's ten supervised beaches every day of the summer and posts a warning when *E. coli* exceeds 100 per 100 mL. This repo analyses every result the City has published, from 2007 to 2026, to answer two questions: are some beaches over the limit much more often than others, and how often does the sign posted each day, which is based on the previous day's samples, match the water quality on the day it is posted?
 
+Two beaches, Marie Curtis Park East and Sunnyside, were over the limit on about a third of sampled days, more than seven times as often as the cleanest beach, while the daily sign missed nearly two thirds of the days over the limit.
 
-## File Structure
+The paper is `paper/paper.pdf`.
 
-The repo is structured as:
+The data are the [Toronto Beaches Water Quality](https://open.toronto.ca/dataset/toronto-beaches-water-quality/) dataset from Open Data Toronto (package `toronto-beaches-water-quality`), published by Toronto Public Health.
 
--   `data/raw_data` contains the raw data as obtained from X.
--   `data/analysis_data` contains the cleaned dataset that was constructed.
--   `model` contains fitted models. 
--   `other` contains relevant literature, details about LLM chat interactions, and sketches.
--   `paper` contains the files used to generate the paper, including the Quarto document and reference bibliography file, as well as the PDF of the paper. 
--   `scripts` contains the R scripts used to simulate, download and clean data.
+## File structure
 
+- `data/00-simulated_data/` contains the simulated data used to test the scripts and the analysis, with and without the laboratory's reporting floor and ceiling.
+- `data/01-raw_data/` contains the raw data as downloaded from Open Data Toronto on 22 September 2026.
+- `data/02-analysis_data/` contains the cleaned data used in the paper.
+- `scripts/` contains the Python scripts that simulate, download, test, clean and analyse the data, numbered in the order they run.
+- `src/toronto_beaches_ecoli/` contains the analysis functions, shared by the check on simulated data and the analysis of the real data.
+- `paper/` contains the Quarto document, the bibliography, the citation style, the figures and the rendered PDF.
+- `other/sketches/` contains sketches of the planned dataset and figures.
+- `other/literature/` contains City of Toronto and Public Health Ontario documents on how the data are collected.
+- `other/results/` contains the tables of results written by `scripts/07-analyse_data.py`.
+- `other/explore/` contains notebooks used to explore the raw data and explain the model.
+- `other/llm_usage/` contains the complete chats with LLMs (see below).
+
+## Reproducing the paper
+
+The project uses [uv](https://docs.astral.sh/uv/) with Python 3.14. Rendering the paper also needs [Quarto](https://quarto.org/) and a LaTeX installation. From the project root:
+
+```bash
+uv sync                                           # install the packages in uv.lock
+uv run scripts/00-simulate_data.py                # simulate data (seeded)
+uv run scripts/01-test_simulated_data.py          # test the simulated data
+uv run scripts/02-download_data.py                # download the raw data
+uv run scripts/03-clean_data.py                   # clean the raw data
+uv run scripts/04-test_analysis_data.py           # test the cleaned data
+uv run scripts/05-exploratory_data_analysis.py    # draw the data figures
+uv run scripts/06-validate_on_simulated_data.py   # check the analysis on simulated data
+uv run scripts/07-analyse_data.py                 # analyse the real data
+cd paper && uv run quarto render paper.qmd        # render paper/paper.pdf
+```
+
+The paper reads only the saved files in `data/`, `other/results/` and `paper/figures/`, so it can be rendered without running the scripts. Running `02-download_data.py` again replaces the saved raw data with the current version on Open Data Toronto, which may differ from the 22 September 2026 download used in the paper. The map in `05-exploratory_data_analysis.py` downloads basemap tiles, so that script needs an internet connection.
 
 ## Statement on LLM usage
 
-Aspects of the code were written with the help of Codriver. The abstract and introduction were written with the help of ChatHorse and the entire chat history is available in inputs/llms/usage.txt.
+Claude (Anthropic) was used throughout this project, and every chat is included in full in `other/llm_usage/`:
 
-## Some checks
+- `00-claude-browser-chat.txt` is a chat with Claude in the browser (claude.ai), used to choose a dataset, set up the repo, understand how the City measures *E. coli* and posts warnings, plan the simulation and analysis, and discuss the preliminary results and the writing.
+- `01-` to `05-` are sessions with Claude Code, which wrote most of the code (the scripts, tests and analysis functions) and drafted and revised the paper with the author, who directed the work and checked and edited the results and the text.
 
-- [ ] Change the rproj file name so that it's not starter_folder.Rproj
-- [ ] Change the README title so that it's not Starter folder
-- [ ] Remove files that you're not using
-- [ ] Update comments in R scripts
-- [ ] Remove this checklist
+No autocomplete tool was used.
