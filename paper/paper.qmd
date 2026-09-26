@@ -50,7 +50,7 @@ execute:
 
 ## Measurement {#sec-data-measurement}
 
-[Columns] Each row of the dataset records one site on one day: the beach, a site code and its location (@fig-sites-map), the date of collection and the *E. coli* result. To obtain each result, staff collect 200 mL of water about 30 cm below the surface at each of the beach's sites (five at most beaches, six at Kew Balmy and four at Sunnyside), and a Public Health Ontario laboratory counts the *E. coli* by membrane filtration, in which bacteria trapped on a filter grow overnight into visible colonies that are counted and scaled to a volume of 100 mL [@phobeach]. Because the process takes about a day, a posted result describes the previous day's water [@tphabout; @tphbeachwq]. When no sample could be taken, usually because of bad weather, the result was left blank [@tphabout]; 3.5% of rows are blank.
+[Columns] Each row of the dataset records one site on one day: the beach, a site code and its location (@fig-sites-map), the date of collection and the *E. coli* result. To obtain each result, staff collect 200 mL of water about 30 cm below the surface at each of the beach's sites (five at most beaches, six at Kew Balmy and four at Sunnyside), and a Public Health Ontario laboratory counts the *E. coli* by membrane filtration, in which bacteria trapped on a filter grow overnight into visible colonies that are counted and scaled to a volume of 100 mL [@phobeach]. Because the process takes about a day, a posted result describes the previous day's water quality [@tphabout; @tphbeachwq]. When no sample could be taken, usually because of bad weather, the result was left blank [@tphabout]; 3.5% of rows are blank.
 
 [Floor and ceiling] The laboratory's reporting limits compress the data at both ends (@fig-raw-results). Results below 10 are rarely reported, so the 49% of results at exactly 10 are best read as "10 or fewer". From 2018, high results were increasingly reported as exactly 1,000; earlier results reached 15,820, whereas none exceeded 1,000 in 2026, which suggests that a reporting ceiling was introduced. Because both limits narrow the range, differences among the cleanest beaches and the severity of the worst days are likely understated. The ceiling can also hide a day over the limit: since 2018, 34 days at a beach included a result of 1,000 yet had a daily geometric mean (@sec-data-methods) below 100, and on about 8 of them a true result of 2,000 or less would have put the day over. The true number of days over the limit since 2018 may therefore be slightly higher than the number calculated from these data.
 
@@ -118,7 +118,7 @@ where, in @eq-model, $G_{bd}$ is the beach's geometric mean that day, $\bar{L}_d
 
 [Model] The standard error of each $\beta_b$ was calculated from the variation between months rather than between days, because a wet week raises a beach's levels for several days running. The few sampling days in late May and early September were counted with June and August. Grouping days this way roughly doubles the width of the intervals compared with treating every day as independent. Each estimate is reported with a 95% interval: if the analysis were repeated over many different runs of summers, about 95% of such intervals would contain the true gap. Two beaches were said to differ significantly when a gap as large as the one observed would arise less than 5% of the time if they were in fact alike. Testing all 45 pairs this way would produce about two false differences by chance, so the comparisons were corrected by Holm's method, which raises the bar each comparison must clear so that the chance of any false difference stays near 5%.
 
-[Consecutive days] Because results take about a day, the sign on display at a beach on any day, called here the posting day, is based on the samples taken the day before. The City posts a "Warning" sign when *E. coli* is over its limit and a "Safe" sign otherwise [@tphabout]. To measure how often the sign was right, each posting day was paired with the previous day at the same beach, using only days that were consecutive (18,998 pairs). The sign on the posting day was taken to be "Warning" if the previous day's geometric mean was over the limit, and "Safe" if it was not. That sign was then compared with the water sampled on the posting day itself.
+[Consecutive days] Because results take about a day, the sign on display at a beach on any day, called here the posting day, is based on the samples taken the day before. The City posts a "Warning" sign when *E. coli* is over its limit and a "Safe" sign otherwise [@tphabout]. To measure how often the sign was right, each posting day was paired with the previous day at the same beach, using only days that were consecutive (18,998 pairs). The sign on the posting day was taken to be "Warning" if the previous day's geometric mean was over the limit, and "Safe" if it was not. That sign was then compared with the water quality measured on the posting day itself.
 
 # Results {#sec-results}
 
@@ -130,11 +130,11 @@ where, in @eq-model, $G_{bd}$ is the beach's geometric mean that day, $\bar{L}_d
 
 ![Each beach's *E. coli* on a typical day, as a multiple of the average beach sampled the same day, 2007 to 2026, with 95% intervals. The reporting floor and ceiling make these gaps smaller than the true ones.](figures/beach-estimates.png){#fig-beach-estimates}
 
-[Yesterday vs today] @tbl-warning compares the sign posted at each beach with the water sampled on the posting day, for 18,998 pairs of consecutive days. The rows give the sign, "Warning" or "Safe", which is based on the previous day's samples; the columns give whether the posting day's water was over or under Toronto's limit. The sign was right on 1,002 days with a "Warning" sign and water over the limit, and on 14,584 days with a "Safe" sign and water under it. It was wrong on 1,712 days with a "Warning" sign and water under the limit, and on 1,700 days with a "Safe" sign and water over it. @tbl-sign-questions gives percentages derived from these counts, as answers to questions relevant to a Toronto beach swimmer.
+[Yesterday vs today] @tbl-warning compares the sign posted at each beach with the water quality measured on the posting day, for 18,998 pairs of consecutive days. The rows give the sign, "Warning" or "Safe", which is based on the previous day's samples; the columns give whether the posting day's water was over or under Toronto's limit. The sign was right on 1,002 days with a "Warning" sign and water over the limit, and on 14,584 days with a "Safe" sign and water under it. It was wrong on 1,712 days with a "Warning" sign and water under the limit, and on 1,700 days with a "Safe" sign and water over it. @tbl-sign-questions gives percentages derived from these counts, as answers to questions relevant to a Toronto beach swimmer.
 
 ```{python}
 #| label: tbl-warning
-#| tbl-cap: "Sign posted at each beach, based on the previous day's samples, against the water on the posting day, for pairs of consecutive days, 2007 to 2026. Each cell gives the number of pairs and its share of all pairs."
+#| tbl-cap: "Sign posted at each beach, based on the previous day's samples, against the water quality on the posting day, for pairs of consecutive days, 2007 to 2026. Each cell gives the number of pairs and its share of all pairs."
 #| tbl-colwidths: [34, 33, 33]
 #| output: asis
 
@@ -153,7 +153,7 @@ for row in confusion.iter_rows(named=True):
 
 ```{python}
 #| label: tbl-sign-questions
-#| tbl-cap: "What the sign says about the water on the posting day, 2007 to 2026, derived from the counts in @tbl-warning. The sign is based on the previous day's samples."
+#| tbl-cap: "What the sign says about the water quality on the posting day, 2007 to 2026, derived from the counts in @tbl-warning. The sign is based on the previous day's samples."
 #| tbl-colwidths: [85, 15]
 #| output: asis
 
@@ -177,7 +177,7 @@ for question, share in questions:
 
 # Discussion {#sec-discussion}
 
-*[Summary] Placeholder: brief summary of the data and results.*
+[Summary] Twenty years of Toronto's beach monitoring give a consistent picture. Marie Curtis Park East and Sunnyside were over the limit on about a third of sampled days, more than seven times as often as Gibraltar Point, and this ranking held from year to year and on both sides of the 2018 change in reporting. Compared on the same days, both carried about twice the *E. coli* of the average beach, and because the reporting limits compress the data, the true gaps are likely larger. The sign posted each day, by contrast, was a weak guide to that day's water quality: it missed nearly two thirds of the days over the limit, and nearly two thirds of the "Warning" signs went up on days when the water was under the limit. For a swimmer, the choice of beach therefore says more about the water quality than the sign posted on the day.
 
 *[Why beaches differ] Placeholder: Etobicoke Creek at Marie Curtis, the Humber River near Sunnyside, storm-water outfalls, island against mainland beaches; analyses of the data that could test these. Hypotheses, not tested here.*
 
