@@ -56,7 +56,7 @@ execute:
 
 ![Every result the City has published, 2007 to 2026. One point is one water sample (98,991 in total), before any cleaning. Points are spread sideways within each year so that they can be seen; the *E. coli* count itself is never moved. Most results are reported in multiples of 10, which is why the low readings fall into separate rows. The laboratory reports no results as zero, and "no colonies detected" is assumed to be reported as 10. From 2018 on, many results are reported as exactly 1,000, and these are assumed to be readings of 1,000 or more. The dashed line marks 100 *E. coli* per 100 mL, the level at which the City posts a swimming warning. The ringed point is the only reading the analysis removes.](figures/all-raw-results.png){#fig-raw-results}
 
-[Cleaning] The data set was downloaded on 22 September 2026. It has 102,534 rows, one for each site on each sampling day from 3 June 2007 to 16 September 2026, and each row gives the beach, a site code, the date the sample was collected, the *E. coli* result and the site's location. After leaving out rows with no result, one implausible reading, two sites listed under the wrong beach and dates outside the season (Appendix [-@sec-appendix-cleaning]), 98,370 results remain, from 50 sites on 2,019 days across 20 years.
+[Cleaning] Before analysis, three groups of results were removed: one implausible reading (ringed in @fig-raw-results), the results from two sites that lie far from the beaches they are listed under (@fig-sites-map), and results from dates outside the swimming season. The remaining 98,370 results come from 50 sites on 2,019 days across 20 years; Appendix [-@sec-appendix-cleaning] gives the details.
 
 [Summary statistics] @tbl-beach-summary summarises the results at each beach. Results span more than three orders of magnitude, so the figures use a logarithmic scale, on which each equal step is a tenfold increase: 10, 100, 1,000. Most results are low. The median, the middle result when all are put in order, is 20, and at eight of the ten beaches it is 10 or 20. Marie Curtis Park East and Sunnyside stand apart. Their medians are 50 and 60, only about a quarter and a fifth of their results are at the floor, and about a third are above 100. At Gibraltar Point, the cleanest beach, 61% of results are at the floor and 6% are above 100.
 
@@ -165,7 +165,7 @@ for row in confusion.iter_rows(named=True):
 
 # Data cleaning {#sec-appendix-cleaning}
 
-*[Cleaning details] Placeholder: every removal with counts and reasons (the reading of 6,191,768; sites 60W and GP6 with a footnote on the City's reply and the download date of 22 September 2026; dates outside the season; days with fewer than four results). Tests run on the cleaned data.*
+*[Cleaning details] Placeholder: downloaded 22 September 2026; 102,534 rows from 3 June 2007 to 16 September 2026, 98,991 with a result; every removal with counts and reasons (1 implausible reading, 220 results from sites 60W and GP6, 400 results outside the season from Victoria Day to Labour Day) (the reading of 6,191,768; sites 60W and GP6 with a footnote on the City's reply and the download date of 22 September 2026; dates outside the season; days with fewer than four results). Tests run on the cleaned data.*
 
 # Checking the method on simulated data {#sec-appendix-validation}
 
