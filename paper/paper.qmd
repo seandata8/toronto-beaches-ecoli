@@ -201,7 +201,22 @@ for question, share in questions:
 
 # Checking the method on simulated data {#sec-appendix-validation}
 
-*[Simulation check] Placeholder: simulated data with known beach differences, the floor and ceiling; the analysis recovers the ordering; censoring leaves about 65% of a true gap; the site-count effect.*
+[Simulation check] To confirm that the analysis finds real differences and does not invent them, it was first run on simulated data in which the answer is known. The simulation reproduces the structure of the real data: the same ten beaches and numbers of sites, daily sampling from Victoria Day to Labour Day, 2007 to 2026, and results built on the log scale from a beach baseline, a city-wide daily effect shared by all beaches, a daily effect for each beach, and noise for each sample. Both daily effects carry half of the previous day's value into the next, so that wet spells last several days. Six beaches were built at a common level, two were raised by 0.2 on the log10 scale (about 1.6 times) and two by 0.4 (about 2.5 times). The simulated results were then reported the way the laboratory reports real ones: rounded to multiples of 10, with nothing below 10, and, from 2018, most results above 1,000 reported as 1,000.
+
+[Simulation check] The analysis recovered what was built in (@tbl-simulation). Without the reporting floor and ceiling, the estimated gaps were 0.399 and 0.208, against true values of 0.400 and 0.200. With them, the estimates fell to 0.260 and 0.126, about 65% of the true gaps, while the order of the groups was unchanged. All 12 comparisons between a beach raised by 0.4 and a beach at the common level were found to differ significantly, and none of the 15 comparisons between beaches built at the same level was, so Holm's correction kept false differences in check. Sunnyside and Kew Balmy, with four and six sites, were both built at the common level, so their shares of days over the limit show the effect of the number of sites alone: at 4.2% and 4.0%, both fell within the range of the other common beaches (4.4% to 6.2%).
+
+```{python}
+#| label: tbl-simulation
+#| tbl-cap: "Gaps above the six beaches built at a common level, on the log10 scale, in simulated data. The reporting floor and ceiling shrink both gaps to about 65% of their true size without changing their order."
+#| tbl-colwidths: [50, 25, 25]
+#| output: asis
+
+gaps = pl.read_csv("../other/results/simulation-gaps.csv")
+print("| | Beaches raised by 0.4 | Beaches raised by 0.2 |")
+print("|:--|--:|--:|")
+for row in gaps.iter_rows(named=True):
+    print(f"| {row['gap']} | {row['high']:.3f} | {row['moderate']:.3f} |")
+```
 
 # Pairwise comparisons {#sec-appendix-pairs}
 

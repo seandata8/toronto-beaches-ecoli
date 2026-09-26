@@ -32,6 +32,8 @@ SIMULATED_DATA_PATH = "data/00-simulated_data/simulated_data.csv"
 # The same draws without the laboratory's floor, rounding and ceiling. Comparing
 # the two says how much the censoring shrinks the gaps between beaches.
 UNCENSORED_DATA_PATH = "data/00-simulated_data/simulated_data_uncensored.csv"
+# The gaps table the paper prints in its appendix.
+GAPS_PATH = "other/results/simulation-gaps.csv"
 
 # What the simulation built in, repeated here rather than imported, so that a
 # change to the simulation has to be noticed rather than followed silently.
@@ -213,6 +215,19 @@ print(
     "\nto the real data, so the paper's estimated differences between beaches are"
     "\nsmaller than the true ones, not larger."
 )
+
+pl.DataFrame(
+    {
+        "gap": [
+            "Built into the simulation",
+            "Estimated, without the floor and ceiling",
+            "Estimated, with the floor and ceiling",
+        ],
+        "high": [HIGH_LIFT, uncensored_high_gap, high_gap],
+        "moderate": [MODERATE_LIFT, uncensored_moderate_gap, moderate_gap],
+    }
+).write_csv(GAPS_PATH)
+print(f"Saved the gaps to {GAPS_PATH}")
 
 print("\nAdvice from yesterday's result:")
 with pl.Config(tbl_rows=-1, tbl_hide_dataframe_shape=True):
