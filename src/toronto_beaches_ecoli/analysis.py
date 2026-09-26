@@ -39,7 +39,18 @@ def daily_geometric_means(
                 "overLimit"
             ),
             pl.col("collectionDate").dt.year().alias("year"),
-            pl.col("collectionDate").dt.strftime("%Y-%m").alias("monthYear"),
+            # The month used to group days for the standard errors. The few
+            # sampling days in late May and early September are counted with June
+            # and August, so that no group is only a handful of days.
+            (
+                pl.col("collectionDate").dt.year().cast(pl.String)
+                + "-"
+                + pl.col("collectionDate")
+                .dt.month()
+                .clip(6, 8)
+                .cast(pl.String)
+                .str.zfill(2)
+            ).alias("groupMonth"),
         )
         .sort("beachName", "collectionDate")
     )
@@ -92,19 +103,19 @@ def fit_beach_model(daily: pl.DataFrame):
     wet week raises nobody's estimate. Each coefficient is a beach's average gap
     from the others, on the log10 scale, so 0.3 means about twice as high.
 
-    Standard errors are clustered by calendar month (for example July 2019),
-    because levels carry over from one day to the next and consecutive days are
-    not independent trials. Partial months at the start and end of a season are
-    kept as smaller clusters.
+    Standard errors are clustered by month (for example July 2019), because
+    levels carry over from one day to the next and consecutive days are not
+    independent trials. The partial months at each end of the season are merged
+    into June and August, giving 60 groups rather than 96.
 
     Subtracting the daily average uses up information the count of rows does not
     know about, so the reported degrees of freedom are slightly optimistic. With
-    96 clusters the effect on the intervals is small.
+    60 clusters the effect on the intervals is small.
     """
     prepared = _relative_to_day(daily)
     return smf.ols("relativeToDay ~ beach - 1", data=prepared.to_pandas()).fit(
         cov_type="cluster",
-        cov_kwds={"groups": prepared["monthYear"].to_list()},
+        cov_kwds={"groups": prepared["groupMonth"].to_list()},
     )
 
 

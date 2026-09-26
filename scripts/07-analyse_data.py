@@ -87,34 +87,6 @@ halves = (
     .sort("before2018", descending=True)
 )
 
-# Whether the pairwise results depend on how days are grouped for the standard
-# errors. The partial months at each end of the season (late May, early
-# September) make small groups; here they are merged into June and August.
-merged_months = daily.with_columns(
-    (
-        pl.col("collectionDate").dt.year().cast(pl.String)
-        + "-"
-        + pl.col("collectionDate").dt.month().clip(6, 8).cast(pl.String).str.zfill(2)
-    ).alias("monthYear")
-)
-differences_merged = pairwise_differences(fit_beach_model(merged_months))
-grouping_check = differences.select(
-    "beachA",
-    "beachB",
-    "difference",
-    pl.col("pValueCorrected").alias("pValueCalendarMonths"),
-    pl.col("differs").alias("differsCalendarMonths"),
-).join(
-    differences_merged.select(
-        "beachA",
-        "beachB",
-        pl.col("pValueCorrected").alias("pValueMergedMonths"),
-        pl.col("differs").alias("differsMergedMonths"),
-    ),
-    on=["beachA", "beachB"],
-)
-
-
 #### Question 2: how well does one day predict the next? ####
 pairs = consecutive_day_pairs(daily)
 agreement = warning_agreement(pairs)
@@ -212,22 +184,6 @@ show(
     )
 )
 
-print(
-    f"\nGrouping partial months with their neighbours ({daily['monthYear'].n_unique()}"
-    f" groups become {merged_months['monthYear'].n_unique()}):"
-    f" {grouping_check['differsMergedMonths'].sum()} pairs differ instead of"
-    f" {grouping_check['differsCalendarMonths'].sum()}. Pairs that change:"
-)
-show(
-    grouping_check.filter(
-        pl.col("differsCalendarMonths") != pl.col("differsMergedMonths")
-    ).with_columns(
-        pl.col("difference").round(3),
-        pl.col("pValueCalendarMonths").round(3),
-        pl.col("pValueMergedMonths").round(3),
-    )
-)
-
 print("\nPairs that cannot be told apart")
 show(
     differences.filter(~pl.col("differs")).with_columns(
@@ -268,7 +224,6 @@ by_year.write_csv(RESULTS_DIR / "exceedance-by-beach-and-year.csv")
 coefficients.write_csv(RESULTS_DIR / "beach-model-coefficients.csv")
 differences.write_csv(RESULTS_DIR / "beach-pairwise-differences.csv")
 inflation.write_csv(RESULTS_DIR / "beach-model-standard-errors.csv")
-grouping_check.write_csv(RESULTS_DIR / "beach-pairwise-grouping-check.csv")
 agreement.write_csv(RESULTS_DIR / "warning-agreement.csv")
 confusion.write_csv(RESULTS_DIR / "warning-confusion-matrix.csv")
 print(f"\nSaved the tables to {RESULTS_DIR}")
