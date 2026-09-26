@@ -1,8 +1,8 @@
 #### Preamble ####
-# Purpose: Draws the four figures that show the whole dataset: a map of the
+# Purpose: Draws the three figures that show the whole dataset: a map of the
 # sampling sites; every published result over time, including the one that
-# cleaning removes; how high the results get at each beach; and every beach-day,
-# which is the unit the analysis uses. The figures are saved to `paper/figures/`
+# cleaning removes; and a histogram of every beach-day, the unit the analysis
+# uses, for each beach. The figures are saved to `paper/figures/`
 # and the paper reads the saved images. Titles and captions are in the paper, not
 # the images; the numbers the captions quote are printed at the end.
 # Author: Sean Murphy
@@ -313,92 +313,12 @@ figure.tight_layout()
 figure.savefig(FIGURE_DIR / "all-raw-results.png", bbox_inches="tight")
 
 
-#### Summary figure: results by order of magnitude, by beach ####
-# The cleaned data, so that what is drawn is exactly what the analysis uses, and
-# the exclusions live in one place rather than being repeated here.
-# Results are counted in bands of ten: 1 to 10, 11 to 100, and so on. Bands rather
-# than narrow bars because the threshold sits on a band edge, so the share of a
-# beach's results above 100 is the last two bars of its panel.
+#### Beach-day histogram: how often each beach goes over the limit ####
+# The cleaned data, so that what is drawn is exactly what the analysis uses.
 summary_results = pl.read_csv(ANALYSIS_DATA_PATH, try_parse_dates=True).with_columns(
     pl.col("eColi").log10().alias("logEColi")
 )
 
-# Four bands, not five: only four results in twenty years passed 10,000, so a
-# separate band for them would be an empty column in every panel.
-BAND_EDGES = [1, 2, 3]
-BAND_LABELS = ["1–10", "11–100", "101–\n1,000", "over\n1,000"]
-
-banded = (
-    summary_results.with_columns(
-        pl.col("logEColi")
-        .cut(BAND_EDGES, labels=[str(band) for band in range(len(BAND_LABELS))])
-        .cast(pl.Int8)
-        .alias("band")
-    )
-    .group_by("beachName", "band")
-    .agg(pl.len().alias("results"))
-)
-
-summary_order = (
-    banded.with_columns(
-        (pl.col("results") * (pl.col("band") >= 2)).alias("aboveThreshold")
-    )
-    .group_by("beachName")
-    .agg((pl.col("aboveThreshold").sum() / pl.col("results").sum()).alias("share"))
-    .sort("share", descending=True)["beachName"]
-    .to_list()
-)
-
-figure, axes = plt.subplots(2, 5, figsize=(10, 6.6), sharex=True, sharey=True)
-for axis, beach in zip(axes.flat, summary_order):
-    counts = (
-        banded.filter(pl.col("beachName") == beach)
-        .sort("band")
-        .select("band", "results")
-    )
-    heights = [
-        counts.filter(pl.col("band") == band)["results"].sum()
-        for band in range(len(BAND_LABELS))
-    ]
-    total = sum(heights)
-    # Bands above the threshold take their own hue, so a panel can be read
-    # without tracing back to the dashed line.
-    band_colours = [
-        ABOVE_THRESHOLD_COLOUR if band >= 2 else DATA_COLOUR
-        for band in range(len(BAND_LABELS))
-    ]
-    bars = axis.bar(range(len(BAND_LABELS)), heights, color=band_colours, width=0.72)
-
-    # The share of results in each band, so a reader can compare beaches with
-    # different numbers of samples without doing the arithmetic.
-    for bar, height in zip(bars, heights):
-        if height == 0:
-            continue
-        axis.annotate(
-            f"{height / total:.0%}" if height / total >= 0.005 else "<1%",
-            xy=(bar.get_x() + bar.get_width() / 2, height),
-            xytext=(0, 2),
-            textcoords="offset points",
-            ha="center",
-            fontsize=7,
-            color=TEXT_SECONDARY,
-        )
-
-    axis.set_title(fill(beach, width=18), fontsize=9.5, color=TEXT_PRIMARY, loc="left")
-    axis.set_xticks(range(len(BAND_LABELS)))
-    axis.set_xticklabels(BAND_LABELS, fontsize=7.5)
-    axis.grid(axis="y", color=GRID_COLOUR, linewidth=0.5)
-    axis.set_axisbelow(True)
-    # The threshold falls on the edge between the second and third band.
-    axis.axvline(1.5, color=TEXT_PRIMARY, linewidth=1, linestyle=(0, (6, 4)), zorder=3)
-
-figure.supylabel("Number of results", fontsize=10, color=TEXT_SECONDARY)
-figure.supxlabel(r"$\it{E.\,coli}$ per 100 mL", fontsize=10, color=TEXT_SECONDARY)
-figure.tight_layout()
-figure.savefig(FIGURE_DIR / "results-by-magnitude.png", bbox_inches="tight")
-
-
-#### Day-level figure: every beach-day the analysis uses ####
 # A beach is judged on the geometric mean of its samples for the day, so this is
 # the unit the analysis works in, and the one the threshold applies to.
 daily_means = (
@@ -412,99 +332,83 @@ daily_means = (
     .with_columns(
         (pl.col("logGeometricMean") > np.log10(WARNING_THRESHOLD)).alias("overLimit")
     )
-    # group_by returns rows in no fixed order. Sorting makes each day get the same
-    # jitter on every run, so the seeded figure is reproducible.
-    .sort("beachName", "collectionDate")
 )
 
-day_order = (
+# Half-log bins. Bins include their upper edge, so a day at exactly 100 falls in
+# 30-100 and is not over the limit. The lowest bin also holds the 17 days whose
+# mean is below the reporting floor of 10.
+BIN_EDGES = np.log10([30, 100, 300, 1_000, 3_000])
+BIN_LABELS = ["≤30", "30–100", "100–300", "300–1,000", "1,000–3,000", "3,000–10,000"]
+FIRST_BIN_OVER_LIMIT = 2
+
+binned_days = daily_means.with_columns(
+    pl.col("logGeometricMean")
+    .cut(BIN_EDGES.tolist(), labels=[str(i) for i in range(len(BIN_LABELS))])
+    .cast(pl.Int8)
+    .alias("bin")
+)
+day_shares = (
     daily_means.group_by("beachName")
     .agg(pl.col("overLimit").mean().alias("share"))
-    .sort("share")["beachName"]
-    .to_list()
+    .sort("share", descending=True)
 )
 
-figure, axis = plt.subplots(figsize=(10, 6.0))
-for row, beach in enumerate(day_order):
-    beach_days = daily_means.filter(pl.col("beachName") == beach)
-    means = beach_days["logGeometricMean"].to_numpy()
-    over = beach_days["overLimit"].to_numpy()
-    height = row + rng.uniform(-0.32, 0.32, size=means.size)
-    # Days over the limit carry their own hue. Position relative to the line says
-    # the same thing, so colour is not doing the work alone.
-    for selected, colour, opacity in (
-        (~over, DATA_COLOUR, 0.22),
-        (over, ABOVE_THRESHOLD_COLOUR, 0.4),
-    ):
-        axis.scatter(
-            means[selected],
-            height[selected],
-            s=10,
-            alpha=opacity,
-            color=colour,
-            linewidths=0,
-            rasterized=True,
-        )
+figure, axes = plt.subplots(2, 5, figsize=(10, 6.6), sharex=True, sharey=True)
+for axis, (beach, share) in zip(axes.flat, day_shares.iter_rows()):
+    beach_days = binned_days.filter(pl.col("beachName") == beach)
+    heights = [
+        beach_days.filter(pl.col("bin") == i).height for i in range(len(BIN_LABELS))
+    ]
+    # Bins over the limit take their own hue, so a panel can be read without
+    # tracing back to the dashed line.
+    colours = [
+        ABOVE_THRESHOLD_COLOUR if i >= FIRST_BIN_OVER_LIMIT else DATA_COLOUR
+        for i in range(len(BIN_LABELS))
+    ]
+    axis.bar(range(len(BIN_LABELS)), heights, color=colours, width=0.8)
+    # The limit falls on the edge between the second and third bins.
+    axis.vlines(
+        FIRST_BIN_OVER_LIMIT - 0.5,
+        0,
+        1_500,
+        color=TEXT_PRIMARY,
+        linewidth=1,
+        linestyle=(0, (6, 4)),
+    )
+    axis.set_title(fill(beach, width=18), fontsize=9.5, loc="left")
     axis.text(
-        1.005,
-        row,
-        f"{over.mean():.0%}",
-        transform=axis.get_yaxis_transform(),
-        va="center",
+        0.97,
+        0.80,
+        f"{share:.0%} of days\nover the limit",
+        transform=axis.transAxes,
+        ha="right",
+        va="top",
         fontsize=9,
+        fontweight="bold",
         color=ABOVE_THRESHOLD_COLOUR,
     )
+    axis.set_xticks(range(len(BIN_LABELS)))
+    axis.set_xticklabels(BIN_LABELS, fontsize=7, rotation=90)
+    axis.grid(axis="y", color=GRID_COLOUR, linewidth=0.5)
+    axis.set_axisbelow(True)
 
-axis.axvline(
-    np.log10(WARNING_THRESHOLD),
-    color=TEXT_PRIMARY,
-    linewidth=1,
-    linestyle=(0, (6, 4)),
-    zorder=3,
+figure.supylabel("Number of beach-days", fontsize=10, color=TEXT_SECONDARY)
+figure.supxlabel(
+    r"Daily geometric mean, $\it{E.\,coli}$ per 100 mL",
+    fontsize=10,
+    color=TEXT_SECONDARY,
 )
-axis.xaxis.set_major_locator(FixedLocator(np.log10([10, 100, 1_000])))
-axis.xaxis.set_major_formatter(count_formatter)
-# Minor ticks inside each decade, so that the discrete values a geometric mean of
-# five multiples of ten can take are placeable by eye.
-axis.xaxis.set_minor_locator(
-    FixedLocator(np.log10([20, 30, 50, 200, 300, 500, 2_000, 3_000]))
-)
-axis.xaxis.set_minor_formatter(count_formatter)
-axis.tick_params(axis="x", which="minor", labelsize=7.5)
+figure.tight_layout()
+figure.savefig(FIGURE_DIR / "beach-day-histogram.png", bbox_inches="tight")
 
-# The 17 days whose geometric mean falls below the reporting floor stretch the
-# axis down to about 2 and squeeze everything else into the right two thirds. The
-# axis starts just under the floor instead, and the caption in the paper says
-# how many days that leaves out.
 below_floor = daily_means.filter(
     pl.col("logGeometricMean") < np.log10(DETECTION_LIMIT)
 ).height
-axis.set_xlim(np.log10(9), daily_means["logGeometricMean"].max() + 0.05)
-axis.set_yticks(range(len(day_order)))
-axis.set_yticklabels(day_order, fontsize=10, color=TEXT_PRIMARY)
-axis.set_ylim(-0.7, len(day_order) - 0.3)
-axis.grid(axis="x", color=GRID_COLOUR, linewidth=0.5)
-axis.set_axisbelow(True)
-axis.tick_params(axis="y", length=0)
-axis.text(
-    1.005,
-    len(day_order) - 0.4,
-    "Share of days\nover the limit",
-    transform=axis.get_yaxis_transform(),
-    va="bottom",
-    fontsize=9,
-    color=TEXT_SECONDARY,
-)
 
-axis.set_xlabel(
-    r"$\it{E.\,coli}$ per 100 mL (log scale)", fontsize=10, color=TEXT_SECONDARY
-)
-figure.tight_layout()
-figure.savefig(FIGURE_DIR / "all-beach-days.png", bbox_inches="tight")
-
-print(f"Saved four figures to {FIGURE_DIR}")
+print(f"Saved three figures to {FIGURE_DIR}")
 print(f"Sampling sites mapped: {sites.height}")
 print(f"Raw results plotted: {raw_results.height:,}")
-print(f"Cleaned results plotted: {summary_results.height:,}")
 print(f"Beach-days plotted: {daily_means.height:,}")
-print(f"Beach-days with a mean below {DETECTION_LIMIT}, off the axis: {below_floor}")
+print(
+    f"Beach-days with a mean below {DETECTION_LIMIT}, in the lowest bin: {below_floor}"
+)
