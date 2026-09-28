@@ -2,7 +2,7 @@
 
 ## Overview
 
-Toronto Public Health samples the water at the city's ten supervised beaches every day of the summer and posts a warning when *E. coli* exceeds 100 per 100 mL. This repo analyses every result the City has published, from 2007 to 2026, to answer two questions: are some beaches over the limit much more often than others, and how often does the sign posted each day, which is based on the previous day's samples, match the water quality on the day it is posted?
+Toronto Public Health samples the water at the city's ten supervised beaches every day of the summer and posts a warning when *E. coli* exceeds 100 per 100 mL. This repo analyzes every result the City has published, from 2007 to 2026, to answer two questions: are some beaches over the limit much more often than others, and how often does the sign posted each day, which is based on the previous day's samples, match the water quality on the day it is posted?
 
 Two beaches, Marie Curtis Park East and Sunnyside, were over the limit on about a third of sampled days, more than seven times as often as the cleanest beach, while the daily sign missed nearly two thirds of the days over the limit.
 
@@ -15,7 +15,7 @@ The data are the [Toronto Beaches Water Quality](https://open.toronto.ca/dataset
 - `data/00-simulated_data/` contains the simulated data used to test the scripts and the analysis, with and without the laboratory's reporting floor and ceiling.
 - `data/01-raw_data/` contains the raw data as downloaded from Open Data Toronto on 22 September 2026.
 - `data/02-analysis_data/` contains the cleaned data used in the paper.
-- `scripts/` contains the Python scripts that simulate, download, test, clean and analyse the data, numbered in the order they run.
+- `scripts/` contains the Python scripts that simulate, download, test, clean and analyze the data, numbered in the order they run.
 - `src/toronto_beaches_ecoli/` contains the analysis functions, shared by the check on simulated data and the analysis of the real data.
 - `paper/` contains the Quarto document, the bibliography, the citation style, the figures and the rendered PDF.
 - `other/sketches/` contains sketches of the planned dataset and figures.
@@ -37,7 +37,7 @@ uv run scripts/03-clean_data.py                   # clean the raw data
 uv run scripts/04-test_analysis_data.py           # test the cleaned data
 uv run scripts/05-exploratory_data_analysis.py    # draw the data figures
 uv run scripts/06-validate_on_simulated_data.py   # check the analysis on simulated data
-uv run scripts/07-analyse_data.py                 # analyse the real data
+uv run scripts/07-analyse_data.py                 # analyze the real data
 cd paper && uv run quarto render paper.qmd        # render paper/paper.pdf
 ```
 
