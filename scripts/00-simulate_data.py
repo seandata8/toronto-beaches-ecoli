@@ -85,6 +85,8 @@ CEILING_COMPLETE_YEAR = 2026
 # A row is kept for every site on every sampling day even when no test was done.
 # In the real data 95% of blanks are whole beach-days rather than single samples:
 # 672 of 20,462 beach-days have no results at all, and only 128 are partly blank.
+# Blanks here are spread evenly across beaches; in the real data they cluster,
+# with every beach untested on 23 days, which the analysis handles the same way.
 BLANK_BEACH_DAY_SHARE = 0.032
 BLANK_SAMPLE_SHARE = 0.002
 N_BLANK_DAYS = 3
@@ -131,7 +133,6 @@ for beach in beaches:
 #### Daily effects ####
 def carried_over_series(n_days: int, carry_over: float, spread: float) -> np.ndarray:
     """A series where each day keeps a fraction of the day before, plus new noise.
-
     `spread` is the standard deviation of the settled series, so raising the
     carry-over changes how persistent the series is without widening it.
     """
