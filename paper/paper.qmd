@@ -61,7 +61,7 @@ The laboratory's reporting limits compress the data at both ends (@fig-raw-resul
 
 Before analysis, three groups of results were removed: one implausible reading (ringed in @fig-raw-results), the results from two sites that lie far from the beaches they are listed under (@fig-sites-map), and results from dates outside the swimming season. The remaining 98,370 results come from 50 sites on 2,019 days across 20 years; Appendix [-@sec-appendix-cleaning] gives the details.
 
-Across all beaches, 84% of results are at or under the limit of 100, but two beaches stand apart (@tbl-beach-summary). At eight of the ten beaches the median result (the middle value when all results are ranked) is 10 or 20, and at Gibraltar Point, the cleanest, 61% of results are at the floor of 10 and only 6% exceed 100. At Marie Curtis Park East and Sunnyside, by contrast, the medians are 50 and 60, only 27% and 20% of results are at the floor, and 35% and 34% exceed 100, about six times the share at Gibraltar Point.
+Across all beaches, 84% of results are at or under the limit of 100, but Marie Curtis Park East and Sunnyside stand apart (@tbl-beach-summary). Their median results (the middle value when all results are ranked) are 50 and 60, only 27% and 20% of their results are at the floor of 10, and 35% and 34% exceed 100. At the other eight beaches the median is 10 or 20. At Gibraltar Point, the cleanest, 61% of results are at the floor and only 6% exceed 100, about a sixth of the share at the two worst beaches.
 
 ```{python}
 #| label: tbl-beach-summary
