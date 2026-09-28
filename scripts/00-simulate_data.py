@@ -158,6 +158,9 @@ for year in range(FIRST_YEAR, LAST_YEAR + 1):
         n_sites = SITES_PER_BEACH[beach]
         site_names = [f"{beach} site {site + 1}" for site in range(n_sites)]
 
+        # All three random parts are drawn from normal distributions on the log10
+        # scale; the floor and ceiling alone make the reported results skewed, as
+        # in the real data.
         site_noise = rng.normal(0, SITE_SD, size=(n_days, n_sites))
         log_results = (
             baselines[beach] + city_effect[:, None] + beach_effect[:, None] + site_noise
