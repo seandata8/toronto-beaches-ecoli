@@ -160,7 +160,13 @@ consecutive_days = daily_means.with_columns(
     pl.col("collectionDate").shift(1).over("beachName").alias("previousDate"),
 ).filter((pl.col("collectionDate") - pl.col("previousDate")).dt.total_days() == 1)
 
-# Exceedance days per beach per year, for the comparison with Poisson.
+# Exceedance days per beach per year. If days went over the limit independently,
+# like coin flips, the counts would be close to Poisson, whose variance equals its
+# mean, so their ratio would be about 1. Neither the real nor the simulated counts
+# are expected to be Poisson: bad days come in runs. Pooled across beaches, though,
+# the ratio mostly reflects the built-in differences between beaches rather than
+# the carry-over; the carry-over is tested directly by the correlation between
+# consecutive days.
 per_year = (
     daily_means.with_columns(pl.col("collectionDate").dt.year().alias("year"))
     .group_by("beachName", "year")
