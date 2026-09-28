@@ -69,7 +69,7 @@ COMMON_BY_DESIGN = ["Sunnyside Beach", "Kew Balmy Beach"]
 N_MODERATE = 2
 N_HIGH = 2
 
-# The laboratory reports in steps of 10 and usually do not report below 10.
+# The laboratory reports in steps of 10 and usually does not report below 10.
 REPORTING_STEP = 10
 DETECTION_LIMIT = 10
 
