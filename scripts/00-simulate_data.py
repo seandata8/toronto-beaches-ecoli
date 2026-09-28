@@ -26,7 +26,6 @@ UNCENSORED_OUTPUT_PATH = Path("data/00-simulated_data/simulated_data_uncensored.
 
 rng = np.random.default_rng(SEED)
 
-
 #### Settings ####
 # Seasons run from Victoria Day to Labour Day, as in the real data.
 FIRST_YEAR = 2007
@@ -49,7 +48,9 @@ SITES_PER_BEACH = {
 # E. coli is built on a log10 scale by adding four parts: a beach baseline, a
 # city-wide daily effect, a beach daily effect and site noise. Each spread below
 # is the standard deviation of that part on its own, once the carry-over has
-# settled down, so the four add up as squares.
+# settled down, so the four add up as squares. The spreads were tuned so that,
+# once the laboratory's floor and ceiling are applied, the simulated results
+# resemble the real data (see `other/notes/analysis_plan.md`).
 COMMON_BASELINE = 1.10
 MODERATE_LIFT = 0.20
 HIGH_LIFT = 0.40
@@ -68,7 +69,7 @@ COMMON_BY_DESIGN = ["Sunnyside Beach", "Kew Balmy Beach"]
 N_MODERATE = 2
 N_HIGH = 2
 
-# The laboratory reports in steps of 10 and cannot report below 10.
+# The laboratory reports in steps of 10 and usually do not report below 10.
 REPORTING_STEP = 10
 DETECTION_LIMIT = 10
 
