@@ -27,10 +27,12 @@ OUTPUT_PATH = Path("data/02-analysis_data/analysis_data.csv")
 # about 390 times the next highest reading ever recorded.
 IMPLAUSIBLE_RESULT = 100_000
 
-# Two sites added in 2026 and listed under beaches 14 to 16 km away. Every other
-# site sits within 0.4 km of the rest of its beach. On 25 September 2026 the City
-# said the listing had been referred for correction, without naming the right
-# beach, so they are left out. A later download may list them differently.
+# Two sites added in 2026. In the data downloaded on 22 September 2026 their
+# locations lie 14 to 16 km from the beaches they are listed under, whereas every
+# other site sits within 0.4 km of the rest of its beach, so they are left out.
+# A download on 28 September 2026 showed that the City had corrected their
+# locations to their listed beaches, with the results unchanged, so with a newer
+# download they could be kept.
 MISLABELLED_SITES = ["60W", "GP6"]
 
 
